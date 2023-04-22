@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        SYSTEM
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wjl.gmall.product.mapper.BaseAttrInfoMapper">
+
+    <resultMap id="baseInfoMap" type="com.wjl.gmall.model.product.BaseAttrInfo">
+        <id column="id" property="id"/>
+
+        <result property="attrName" column="attr_name"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="categoryLevel" column="category_level"/>
+
+        <collection property="attrValueList" ofType="com.wjl.gmall.model.product.BaseAttrValue">
+            <id property="id" column="attr_value_id"/>
+            <result property="valueName" column="value_name"/>
+            <result property="attrId" column="attr_id"/>
+        </collection>
+    </resultMap>
+
+    <select id="getAttrInfoList" resultMap="baseInfoMap">
+        select
+            info.id,
+            info.attr_name,
+            info.category_id,
+            info.category_level,
+            val.id attr_value_id,
+            val.value_name,
+            val.attr_id
+        from
+            `base_attr_info` info
+        inner join
+            `base_attr_value` val
+        on
+            val.attr_id = info.id
+        <where>
+            <if test="category1Id != null and category1Id != 0">
+                (info.category_level = 1 AND info.category_id = #{category1Id})
+            </if>
+            <if test="category2Id != null and category2Id != 0">
+                or
+                (info.category_level = 2 AND info.category_id = #{category2Id})
+            </if>
+            <if test="category3Id != null and category3Id != 0">
+                or
+                (info.category_level = 3 AND info.category_id = #{category3Id})
+            </if>
+            order by
+                info.category_level,info.id
+        </where>
+
+    </select>
+</mapper>

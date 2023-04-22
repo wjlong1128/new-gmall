@@ -1,0 +1,22 @@
+my-server:
+  addr: localhost
+
+spring:
+  application:
+    name: service-product
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${my-server.addr}:8848
+      config:
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+#        group: DEFAULT_GROUP
+#        name: ${spring.application.name}
+#        file-extension: yaml
+        shared-configs:
+          - data-id: common.yaml
+            group: DEFAULT_GROUP
+            refresh: true
+

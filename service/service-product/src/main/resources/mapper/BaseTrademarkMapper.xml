@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wjl.gmall.product.mapper.BaseTrademarkMapper">
+
+    <resultMap id="trademarkMap" type="com.wjl.gmall.model.product.BaseTrademark">
+        <id column="id" property="id"/>
+        <result property="tmName" column="tm_name"/>
+        <result property="logoUrl" column="logo_url"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="isDeleted" column="is_deleted"/>
+    </resultMap>
+
+    <select id="selectTrademarkByIds" resultMap="trademarkMap">
+        select
+            id, tm_name ,logo_url, create_time ,update_time, is_deleted
+        from
+            base_trademark
+        where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        and is_deleted = 0
+    </select>
+</mapper>
