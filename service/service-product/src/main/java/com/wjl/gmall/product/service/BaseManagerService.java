@@ -1,6 +1,5 @@
 package com.wjl.gmall.product.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wjl.gmall.model.product.*;
 
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.List;
  * @date 2023/4/21
  * @description
  */
-public interface BaseManagerService  {
+public interface BaseManagerService {
     List<BaseCategory1> getCategory1();
 
     List<BaseCategory2> getCategory2List(Long id);
@@ -24,9 +23,10 @@ public interface BaseManagerService  {
 
     List<BaseAttrValue> getAttrValueList(Long attrId);
 
-   BaseAttrInfo getAttrInfoById(Long attrId);
+    BaseAttrInfo getAttrInfoById(Long attrId);
 
 
+    BaseCategoryView getCategoryView(Long category3Id);
 
-    Page<SpuInfo> getSpuInfoList(Long page, Long limit, SpuInfo spuInfo);
+
 }

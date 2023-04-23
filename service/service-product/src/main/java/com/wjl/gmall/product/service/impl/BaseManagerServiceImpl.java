@@ -1,7 +1,6 @@
 package com.wjl.gmall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wjl.gmall.model.product.*;
 import com.wjl.gmall.product.mapper.*;
 import com.wjl.gmall.product.service.BaseManagerService;
@@ -38,6 +37,8 @@ public class BaseManagerServiceImpl implements BaseManagerService {
     @Autowired
     private BaseAttrValueMapper baseAttrValueMapper;
 
+    @Autowired
+    private CategoryViewMapper categoryViewMapper;
 
     @Autowired
     private SpuInfoMapper spuInfoMapper;
@@ -73,7 +74,6 @@ public class BaseManagerServiceImpl implements BaseManagerService {
         } else {
             baseAttrInfoMapper.insert(baseAttrInfo);
         }
-
         List<BaseAttrValue> newValueList = baseAttrInfo.getAttrValueList();
         if (!CollectionUtils.isEmpty(newValueList)) {
 
@@ -85,7 +85,7 @@ public class BaseManagerServiceImpl implements BaseManagerService {
             }
 
             newValueList.forEach(item -> {
-                item.setAttrId(baseAttrInfoId);
+                item.setAttrId(baseAttrInfo.getId());
                 // 这里写sql更好，但是懒
                 baseAttrValueMapper.insert(item);
             });
@@ -108,6 +108,12 @@ public class BaseManagerServiceImpl implements BaseManagerService {
         return attrInfo;
     }
 
+    @Override
+    public BaseCategoryView getCategoryView(Long category3Id) {
+        return categoryViewMapper.selectById(category3Id);
+    }
+
+
 
 
     private List<BaseAttrValue> getAttrValueListByAttrId(Long id) {
@@ -116,11 +122,6 @@ public class BaseManagerServiceImpl implements BaseManagerService {
         return baseAttrValueMapper.selectList(queryWrapper);
     }
 
-    @Override
-    public Page<SpuInfo> getSpuInfoList(Long page, Long limit, SpuInfo spuInfo) {
-        LambdaQueryWrapper<SpuInfo> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(spuInfo.getCategory3Id() != null,SpuInfo::getCategory3Id,spuInfo.getCategory3Id());
-        Page<SpuInfo> infoPage = spuInfoMapper.selectPage(new Page<>(page, limit), wrapper);
-        return infoPage;
-    }
+
 }
+

@@ -1,8 +1,9 @@
 package com.wjl.gmall.product.service.impl;
 
-import com.wjl.gamll.feign.client.FileServiceClient;
-import com.wjl.gamll.feign.dto.FileInfo;
+
+import com.wjl.gamll.file.client.FileServiceClient;
 import com.wjl.gmall.common.result.Result;
+import com.wjl.gmall.model.dto.FileInfo;
 import com.wjl.gmall.product.service.FileUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

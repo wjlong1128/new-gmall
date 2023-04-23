@@ -1,9 +1,10 @@
 package com.wjl.gamll.product.feign;
 
-import com.wjl.gamll.feign.client.FileServiceClient;
-import com.wjl.gamll.feign.dto.FileInfo;
+
+import com.wjl.gamll.file.client.FileServiceClient;
 import com.wjl.gmall.common.result.Result;
 import com.wjl.gmall.common.utils.FileUtil;
+import com.wjl.gmall.model.dto.FileInfo;
 import com.wjl.gmall.product.ProductApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,9 @@ public class UploadFileServiceTest {
 
     @Test
     public void testUploadFormDate() throws IOException {
-        MultipartFile file = FileUtil.getFormMultipartFile("file", new File("D:\\gmall\\gmall-parent\\a_file\\common.yaml"));
-        Result<FileInfo> fileInfoResult = fileServiceClient.uploadFormDate(file,null);
+        MultipartFile file = FileUtil.getFormMultipartFile("file", new File("D:\\file\\YOIh-OAMITvcgv8G.mp4"));
+        //Result<FileInfo> fileInfoResult = fileServiceClient.uploadFormDate(file,null);
+        Result<FileInfo> fileInfoResult = fileServiceClient.uploadFormDate(file,"a.mp4");
         System.out.println(fileInfoResult.getData());
     }
 

@@ -14,7 +14,7 @@
     <modules>
         <module>common-util</module>
         <module>service-util</module>
-        <module>gmall-feign</module>
+        <module>web-util</module>
     </modules>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

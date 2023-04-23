@@ -4,12 +4,12 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.wjl.gmall.product.mapper.BaseAttrInfoMapper">
 
-    <resultMap id="baseInfoMap" type="com.wjl.gmall.model.product.BaseAttrInfo">
+    <resultMap id="baseInfoMap" type="com.wjl.gmall.model.product.BaseAttrInfo" autoMapping="true">
         <id column="id" property="id"/>
 
-        <result property="attrName" column="attr_name"/>
-        <result property="categoryId" column="category_id"/>
-        <result property="categoryLevel" column="category_level"/>
+        <!--<result property="attrName" column="attr_name"/>-->
+        <!--<result property="categoryId" column="category_id"/>-->
+        <!--<result property="categoryLevel" column="category_level"/>-->
 
         <collection property="attrValueList" ofType="com.wjl.gmall.model.product.BaseAttrValue">
             <id property="id" column="attr_value_id"/>
@@ -48,6 +48,51 @@
             order by
                 info.category_level,info.id
         </where>
+
+    </select>
+    <!--
+            select
+            b.id,
+            b.attr_name,
+            b.category_id,
+            b.category_level,
+            bav.id attr_value_id,
+            bav.value_name,
+            bav.attr_id
+        from
+            sku_attr_value sav
+        join
+            base_attr_info b
+        on
+            sav.attr_id = b.id
+        join
+            base_attr_value bav
+        on
+            b.id = bav.attr_id and sav.value_id = bav.id
+        where
+            sav.sku_id = #{skuId}
+        order by b.id
+    -->
+    <select id="getAttrListBySkuId" resultMap="baseInfoMap">
+
+
+
+        SELECT
+        bai.id,
+        bai.attr_name,
+        bai.category_id,
+        bai.category_level,
+        bav.id attr_value_id,
+        bav.value_name,
+        bav.attr_id
+        FROM
+        base_attr_info bai
+        INNER JOIN base_attr_value bav ON bai.id = bav.attr_id
+        INNER JOIN sku_attr_value sav ON sav.value_id = bav.id
+        WHERE
+        sav.sku_id = #{skuId}
+        order by
+         bai.id
 
     </select>
 </mapper>

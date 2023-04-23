@@ -92,6 +92,4 @@ public class UploadFileServiceImpl implements UploadFileService {
             throw new RuntimeException(e);
         }
     }
-
-
 }

@@ -16,10 +16,6 @@ spring:
       pool-name: SPHHikariPool # 连接池名称
   zipkin:
     base-url: http://${my-server.addr}:9411
-minio:
-  endpointUrl: http://47.93.148.192:9000
-  accessKey: admin
-  secreKey: admin123456
-  bucketName: gmall
+
 
 

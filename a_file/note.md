@@ -15,4 +15,7 @@
 
 ![spu](https://raw.githubusercontent.com/wjlong1128/images/main/xczx/202304221712785.png)
 
+# sku
+![sku](https://raw.githubusercontent.com/wjlong1128/images/main/xczx/202304231056390.png)
+
 

@@ -4,13 +4,15 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 全局统一返回结果类
  *
  */
 @Data
 @ApiModel(value = "全局统一返回结果")
-public class Result<T> {
+public class Result<T> implements Serializable {
 
     @ApiModelProperty(value = "返回码")
     private Integer code;
