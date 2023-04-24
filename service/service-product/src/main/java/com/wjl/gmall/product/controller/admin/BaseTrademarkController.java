@@ -2,7 +2,7 @@ package com.wjl.gmall.product.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wjl.gmall.common.result.Result;
-import com.wjl.gmall.model.product.BaseTrademark;
+import com.wjl.gmall.product.model.entity.BaseTrademark;
 import com.wjl.gmall.product.service.BaseTrademarkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

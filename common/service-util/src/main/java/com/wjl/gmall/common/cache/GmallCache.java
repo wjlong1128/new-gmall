@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
+@Inherited // 被修饰的类的子类可继承该注解
 @Documented
 public @interface GmallCache {
 

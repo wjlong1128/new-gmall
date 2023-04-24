@@ -1,7 +1,7 @@
 package com.wjl.gmall.product.controller.admin;
 
 import com.wjl.gmall.common.result.Result;
-import com.wjl.gmall.model.product.*;
+import com.wjl.gmall.product.model.entity.*;
 import com.wjl.gmall.product.service.BaseManagerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

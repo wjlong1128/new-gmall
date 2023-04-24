@@ -14,3 +14,11 @@ spring:
           - data-id: common.yaml
             group: DEFAULT_GROUP
             refresh: true
+gmall:
+  item:
+    pool:
+      core-size: 30
+      max-size: 60
+      keep-alive-time: 30
+      queue-size: 1024
+      unit: seconds

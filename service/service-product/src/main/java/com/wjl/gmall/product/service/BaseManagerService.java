@@ -1,6 +1,7 @@
 package com.wjl.gmall.product.service;
 
-import com.wjl.gmall.model.product.*;
+import com.wjl.gmall.product.model.entity.*;
+import com.wjl.gmall.product.model.vo.CategoryVO;
 
 import java.util.List;
 
@@ -51,7 +52,13 @@ public interface BaseManagerService {
      * @param category3Id
      * @return
      */
+
     BaseCategoryView getCategoryView(Long category3Id);
 
 
+    /**
+     *  获取所有分类 以层级关系展示
+     * @return
+     */
+    List<CategoryVO> getCategoryList();
 }

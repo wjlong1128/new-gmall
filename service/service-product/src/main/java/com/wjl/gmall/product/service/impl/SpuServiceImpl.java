@@ -2,8 +2,9 @@ package com.wjl.gmall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wjl.gmall.model.product.*;
+import com.wjl.gmall.common.cache.GmallCache;
 import com.wjl.gmall.product.mapper.*;
+import com.wjl.gmall.product.model.entity.*;
 import com.wjl.gmall.product.service.SpuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -121,6 +122,7 @@ public class SpuServiceImpl implements SpuService {
      * @param spuId
      * @return
      */
+    @GmallCache(prefix = "spuSaleAttr")
     @Override
     public List<SpuSaleAttr> spuSaleAttrListBySpuId(Long spuId) {
         SpuInfo spuInfo = spuInfoMapper.selectById(spuId);

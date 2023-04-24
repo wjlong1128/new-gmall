@@ -1,9 +1,9 @@
 package com.wjl.gmall.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.wjl.gmall.model.product.BaseCategoryTrademark;
-import com.wjl.gmall.model.product.BaseTrademark;
-import com.wjl.gmall.model.product.CategoryTrademarkVo;
+import com.wjl.gmall.product.model.entity.BaseCategoryTrademark;
+import com.wjl.gmall.product.model.entity.BaseTrademark;
+import com.wjl.gmall.product.model.entity.CategoryTrademarkVo;
 
 import java.util.List;
 

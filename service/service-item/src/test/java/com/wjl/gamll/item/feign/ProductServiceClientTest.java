@@ -1,9 +1,9 @@
 package com.wjl.gamll.item.feign;
 
 import com.wjl.gamll.item.ItemApplication;
-import com.wjl.gamll.product.client.ProductServiceClient;
+import com.wjl.gmall.product.client.ProductServiceClient;
+import com.wjl.gmall.product.client.model.dto.SpuPoster;
 import com.wjl.gmall.common.result.Result;
-import com.wjl.gmall.model.product.SpuPoster;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

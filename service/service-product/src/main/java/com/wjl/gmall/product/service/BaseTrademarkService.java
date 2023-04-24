@@ -2,7 +2,7 @@ package com.wjl.gmall.product.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.wjl.gmall.model.product.BaseTrademark;
+import com.wjl.gmall.product.model.entity.BaseTrademark;
 
 import java.util.List;
 

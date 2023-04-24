@@ -4,7 +4,7 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.wjl.gmall.product.mapper.BaseTrademarkMapper">
 
-    <resultMap id="trademarkMap" type="com.wjl.gmall.model.product.BaseTrademark">
+    <resultMap id="trademarkMap" type="com.wjl.gmall.product.model.entity.BaseTrademark">
         <id column="id" property="id"/>
         <result property="tmName" column="tm_name"/>
         <result property="logoUrl" column="logo_url"/>

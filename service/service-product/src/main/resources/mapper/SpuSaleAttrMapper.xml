@@ -4,10 +4,10 @@
 
     <!--结果处理-手动映射-->
 
-    <resultMap id="spuSaleAttrMap" type="com.wjl.gmall.model.product.SpuSaleAttr" autoMapping="true">
+    <resultMap id="spuSaleAttrMap" type="com.wjl.gmall.product.model.entity.SpuSaleAttr" autoMapping="true">
 
         <id column="id" property="id"></id>
-        <collection property="spuSaleAttrValueList" ofType="com.wjl.gmall.model.product.SpuSaleAttrValue" autoMapping="true">
+        <collection property="spuSaleAttrValueList" ofType="com.wjl.gmall.product.model.entity.SpuSaleAttrValue" autoMapping="true">
 
             <id column="sale_attr_value_id" property="id"></id>
 

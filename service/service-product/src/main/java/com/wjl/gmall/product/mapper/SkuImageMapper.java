@@ -1,7 +1,7 @@
 package com.wjl.gmall.product.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.wjl.gmall.model.product.SkuImage;
+import com.wjl.gmall.product.model.entity.SkuImage;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

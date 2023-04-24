@@ -1,15 +1,20 @@
 package com.wjl.gmall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.wjl.gmall.model.product.*;
+import com.wjl.gmall.common.cache.GmallCache;
 import com.wjl.gmall.product.mapper.*;
+import com.wjl.gmall.product.model.entity.*;
+import com.wjl.gmall.product.model.vo.CategoryVO;
 import com.wjl.gmall.product.service.BaseManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /*
@@ -61,7 +66,8 @@ public class BaseManagerServiceImpl implements BaseManagerService {
     }
 
     /**
-     *  获取任一分类级别下的平台属性
+     * 获取任一分类级别下的平台属性
+     *
      * @param category1Id
      * @param category2Id
      * @param category3Id
@@ -73,7 +79,8 @@ public class BaseManagerServiceImpl implements BaseManagerService {
     }
 
     /**
-     *  保存或更新基本属性与基本属性值
+     * 保存或更新基本属性与基本属性值
+     *
      * @param baseAttrInfo
      */
     @Transactional(rollbackFor = Exception.class)
@@ -106,7 +113,8 @@ public class BaseManagerServiceImpl implements BaseManagerService {
     }
 
     /**
-     *  根据基本属性id获取基本属性值集合
+     * 根据基本属性id获取基本属性值集合
+     *
      * @param attrId
      * @return
      */
@@ -117,7 +125,8 @@ public class BaseManagerServiceImpl implements BaseManagerService {
     }
 
     /**
-     *  根据基本属性id获取基本属性与基本属性值集合
+     * 根据基本属性id获取基本属性与基本属性值集合
+     *
      * @param attrId
      * @return
      */
@@ -130,16 +139,66 @@ public class BaseManagerServiceImpl implements BaseManagerService {
     }
 
     /**
-     *  查询分类视图  手机 > 手机通讯 > 智能手机
+     * 查询分类视图  手机 > 手机通讯 > 智能手机
+     *
      * @param category3Id
      * @return
      */
+    @GmallCache(prefix = "categoryView")
     @Override
     public BaseCategoryView getCategoryView(Long category3Id) {
         return categoryViewMapper.selectById(category3Id);
     }
 
+    /**
+     * 获取所有分类 以层级关系展示
+     *
+     * @return
+     */
+    @GmallCache(prefix = "getCategoryList")
+    @Override
+    public List<CategoryVO> getCategoryList() {
+        ArrayList<CategoryVO> list = new ArrayList<>();
 
+        List<BaseCategoryView> views = categoryViewMapper.selectList(null);
+        // 视图查出所有，根据一级分类的id分组
+        Map<Long, List<BaseCategoryView>> category1Map =
+                views.stream().collect(Collectors.groupingBy(BaseCategoryView::getCategory1Id));
+
+
+        int index = 1;
+        for (Map.Entry<Long, List<BaseCategoryView>> entry : category1Map.entrySet()) {
+            // key 一级分类id, value 一条数据
+            //System.out.println("key:" + entry.getKey() + "   value:"+entry.getValue());
+            CategoryVO categoryVO = new CategoryVO();
+            String c1Name = entry.getValue().get(0).getCategory1Name();
+            categoryVO.setCategoryName(c1Name);
+            // index++
+            categoryVO.setIndex(index++);
+            categoryVO.setCategoryId(entry.getKey());
+            ArrayList<CategoryVO.CategoryChild> category2Child = new ArrayList<>();
+            // 获取二级分类
+            Map<Long, List<BaseCategoryView>> category2Map = entry.getValue().stream().collect(Collectors.groupingBy(BaseCategoryView::getCategory2Id));
+            for (Map.Entry<Long, List<BaseCategoryView>> c2Entry : category2Map.entrySet()) {
+                CategoryVO.CategoryChild e = new CategoryVO.CategoryChild();
+                e.setCategoryId(c2Entry.getKey());
+                e.setCategoryName(c2Entry.getValue().get(0).getCategory2Name());
+
+                ArrayList<CategoryVO.CategoryChild> c2Child = new ArrayList<>();
+                Set<Map.Entry<Long, List<BaseCategoryView>>> category3Map = c2Entry.getValue().stream().collect(Collectors.groupingBy(BaseCategoryView::getCategory3Id)).entrySet();
+                for (Map.Entry<Long, List<BaseCategoryView>> c3Entry : category3Map) {
+                    c2Child.add(new CategoryVO.CategoryChild(c3Entry.getKey(),c3Entry.getValue().get(0).getCategory3Name(),null));
+                }
+
+                e.setCategoryChild(c2Child);
+
+                category2Child.add(e);
+            }
+            categoryVO.setCategoryChild(category2Child);
+            list.add(categoryVO);
+        }
+        return list;
+    }
 
 
     private List<BaseAttrValue> getAttrValueListByAttrId(Long id) {

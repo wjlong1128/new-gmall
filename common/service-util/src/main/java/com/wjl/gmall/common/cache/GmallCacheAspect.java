@@ -1,9 +1,9 @@
 package com.wjl.gmall.common.cache;
 
 import com.alibaba.fastjson.JSON;
-
 import com.wjl.gmall.common.constant.RedisConst;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit;
  * @author atguigu-mqx
  */
 @Component
-@Aspect
+@Slf4j
+@Aspect // 纵向重复代码 横向抽取
 public class GmallCacheAspect {
 
     @Autowired
@@ -34,7 +35,7 @@ public class GmallCacheAspect {
     //  定义一个环绕通知！
     @SneakyThrows
     @Around("@annotation(com.wjl.gmall.common.cache.GmallCache)")
-    public Object gmallCacheAspectMethod(ProceedingJoinPoint point){
+    public Object gmallCacheAspectMethod(ProceedingJoinPoint point) {
         //  定义一个对象
         Object obj = new Object();
         /*
@@ -53,37 +54,36 @@ public class GmallCacheAspect {
         //   获取到注解上的前缀
         String prefix = gmallCache.prefix();
         //  组成缓存的key！ 获取方法传递的参数
-        String key = prefix+ Arrays.asList(point.getArgs()).toString();
+        String key = prefix + Arrays.asList(point.getArgs()).toString();
         try {
             //  可以通过这个key 获取缓存的数据
-            obj = this.getRedisData(key,methodSignature);
-            if (obj==null){
+            obj = this.getRedisData(key, methodSignature);
+            if (obj == null) {
                 //  分布式业务逻辑
                 //  设置分布式锁，进入数据库进行查询数据！
                 RLock lock = redissonClient.getLock(key + ":lock");
                 //  调用trylock方法
                 boolean result = lock.tryLock(RedisConst.SKULOCK_EXPIRE_PX1, RedisConst.SKULOCK_EXPIRE_PX2, TimeUnit.SECONDS);
                 //  判断
-                if(result){
+                if (result) {
                     try {
                         //  执行业务逻辑：直接从数据库获取数据
                         //  这个注解 @GmallCache 有可能在 BaseCategoryView getCategoryName , List<SpuSaleAttr> getSpuSaleAttrListById ....
                         obj = point.proceed(point.getArgs());
                         //  防止缓存穿透
-                        if (obj==null){
-                            Object object = new Object();
+                        if (obj == null) {
                             //  将缓存的数据变为 Json 的 字符串
-                            this.redisTemplate.opsForValue().set(key, JSON.toJSONString(object),RedisConst.SKUKEY_TEMPORARY_TIMEOUT,TimeUnit.SECONDS);
-                            return object;
+                            this.redisTemplate.opsForValue().set(key, "{}", RedisConst.SKUKEY_TEMPORARY_TIMEOUT, TimeUnit.SECONDS);
+                            return null;
                         }
                         //  将缓存的数据变为 Json 的 字符串
-                        this.redisTemplate.opsForValue().set(key, JSON.toJSONString(obj),RedisConst.SKUKEY_TIMEOUT,TimeUnit.SECONDS);
+                        this.redisTemplate.opsForValue().set(key, JSON.toJSONString(obj), RedisConst.SKUKEY_TIMEOUT, TimeUnit.SECONDS);
                         return obj;
-                    }finally {
+                    } finally {
                         //  解锁
                         lock.unlock();
                     }
-                }else {
+                } else {
                     //  没有获取到
                     try {
                         Thread.sleep(100);
@@ -92,8 +92,9 @@ public class GmallCacheAspect {
                         e.printStackTrace();
                     }
                 }
-            }else {
+            } else {
                 //  直接从缓存获取的数据！
+                log.info("走缓存...{}",methodSignature.getMethod().getName());
                 return obj;
             }
         } catch (Throwable throwable) {
@@ -105,17 +106,18 @@ public class GmallCacheAspect {
 
     /**
      * 从缓存中获取数据！
+     *
      * @param key
      * @return
      */
-    private Object getRedisData(String key,MethodSignature methodSignature) {
+    private Object getRedisData(String key, MethodSignature methodSignature) {
         //  在向缓存存储数据的时候，将数据变为Json 字符串了！
         //  通过这个key 获取到缓存的value
         String strJson = (String) this.redisTemplate.opsForValue().get(key);
         //  判断
-        if(!StringUtils.isEmpty(strJson)){
+        if (!StringUtils.isEmpty(strJson)) {
             //  将字符串转换为对应的数据类型！
-            return JSON.parseObject(strJson,methodSignature.getReturnType());
+            return JSON.parseObject(strJson, methodSignature.getReturnType());
         }
         return null;
     }

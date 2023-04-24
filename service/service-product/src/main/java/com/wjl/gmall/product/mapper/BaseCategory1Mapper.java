@@ -1,8 +1,7 @@
 package com.wjl.gmall.product.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.wjl.gmall.model.product.BaseCategory1;
-import org.apache.ibatis.annotations.Mapper;
+import com.wjl.gmall.product.model.entity.BaseCategory1;
 
 /*
  * @author Wang Jianlong

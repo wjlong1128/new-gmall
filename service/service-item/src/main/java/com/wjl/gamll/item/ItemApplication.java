@@ -1,6 +1,6 @@
 package com.wjl.gamll.item;
 
-import com.wjl.gamll.product.client.config.ProductDefaultConfig;
+import com.wjl.gmall.product.client.config.ProductDefaultConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -13,7 +13,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @date 2023/4/23
  * @description
  */
-@EnableFeignClients(basePackages = "com.wjl.gamll.product.client", defaultConfiguration = ProductDefaultConfig.class)
+@EnableFeignClients(basePackages = "com.wjl.gmall", defaultConfiguration = ProductDefaultConfig.class)
 @EnableDiscoveryClient
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 public class ItemApplication {

@@ -1,7 +1,7 @@
 package com.wjl.gmall.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.wjl.gmall.model.product.BaseSaleAttr;
+import com.wjl.gmall.product.model.entity.BaseSaleAttr;
 
 /*
  * @author Wang Jianlong

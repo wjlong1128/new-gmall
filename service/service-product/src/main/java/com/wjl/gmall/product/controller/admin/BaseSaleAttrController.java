@@ -1,7 +1,7 @@
 package com.wjl.gmall.product.controller.admin;
 
 import com.wjl.gmall.common.result.Result;
-import com.wjl.gmall.model.product.BaseSaleAttr;
+import com.wjl.gmall.product.model.entity.BaseSaleAttr;
 import com.wjl.gmall.product.service.BaseSaleAttrService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

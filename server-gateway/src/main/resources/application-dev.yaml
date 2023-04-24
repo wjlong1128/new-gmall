@@ -49,7 +49,7 @@ spring:
         - id: web-item
           uri: lb://web-all
           predicates:
-            - Host=item.gmall.com
+            - Host=item.gmall.com,sph.atguigu.cn
         #==================首页前端==========================
         - id: web-index
           uri: lb://web-all

@@ -1,7 +1,8 @@
 package com.wjl.gmall.product.controller.api;
 
 import com.wjl.gmall.common.result.Result;
-import com.wjl.gmall.model.product.*;
+import com.wjl.gmall.product.model.entity.*;
+import com.wjl.gmall.product.model.vo.CategoryVO;
 import com.wjl.gmall.product.service.BaseManagerService;
 import com.wjl.gmall.product.service.SkuService;
 import com.wjl.gmall.product.service.SpuService;
@@ -121,4 +122,10 @@ public class ProductApiController {
         return spuService.getSkuValueIdsMap(spuId);
     }
 
+
+    @GetMapping("getBaseCategoryList")
+    public Result<List<CategoryVO>> getBaseCategoryList(){
+        List<CategoryVO> categoryList = baseManagerService.getCategoryList();
+        return Result.ok(categoryList);
+    }
 }

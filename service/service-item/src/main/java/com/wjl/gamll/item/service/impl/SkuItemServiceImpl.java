@@ -2,9 +2,12 @@ package com.wjl.gamll.item.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.wjl.gamll.item.service.SkuItemService;
-import com.wjl.gamll.product.client.ProductServiceClient;
-import com.wjl.gmall.common.result.Result;
-import com.wjl.gmall.model.product.*;
+import com.wjl.gmall.product.client.ProductServiceClient;
+import com.wjl.gmall.common.constant.RedisConst;
+import com.wjl.gmall.product.client.model.dto.*;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBloomFilter;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +15,8 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 /*
@@ -20,55 +25,104 @@ import java.util.stream.Collectors;
  * @date 2023/4/23
  * @description
  */
+@Slf4j
 @Service
 public class SkuItemServiceImpl implements SkuItemService {
 
     @Autowired
     private ProductServiceClient productServiceClient;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
+    @Autowired
+    private ThreadPoolExecutor executor;
+
     /**
-     *  获取并且整理商品详情页数据
+     * 获取并且整理商品详情页数据
+     *
      * @param skuId
      * @return
      */
     @Override
     public Map<String, Object> getSkuDetailsBySkuId(Long skuId) {
         Map<String, Object> result = new HashMap<>();
+        RBloomFilter<Object> skuBloomFilter = redissonClient.getBloomFilter(RedisConst.SKU_BLOOM_FILTER);
 
-        // spuinfo and images
-        Result<SkuInfo> spuInfo = productServiceClient.getSkuInfoAndImages(skuId);
-        result.put("skuInfo", spuInfo.getData());
-        // 实时价格
-        Result<BigDecimal> price = productServiceClient.getSkuPrice(skuId);
-        result.put("price", price.getData());
-        // 平台属性
-        Result<List<BaseAttrInfo>> attrList = productServiceClient.getAttrList(skuId);
-        List<BaseAttrInfo> baseAttrInfos = attrList.getData();
-        // 处理数据
-        List<HashMap<String, String>> processAttrInfos = baseAttrInfos.stream().map(baseAttrInfo -> {
-            HashMap<String, String> map = new HashMap<>();
-            map.put("attrName", baseAttrInfo.getAttrName());
-            String valueName = baseAttrInfo.getAttrValueList().get(0).getValueName();
-            map.put("attrValue", valueName);
-            return map;
-        }).collect(Collectors.toList());
-        result.put("skuAttrList", processAttrInfos);
+        //if (skuBloomFilter.contains(skuId)) {
+        //    return result;
+        //}
+        log.info("bloomFilter: {}, exist:{}", RedisConst.SKU_BLOOM_FILTER, skuBloomFilter.contains(skuId));
 
-        SkuInfo spuInfoAndImages = spuInfo.getData();
-        if (spuInfoAndImages != null) {
-            // 三级分类视图
-            Result<BaseCategoryView> categoryView = productServiceClient.getCategoryView(spuInfoAndImages.getCategory3Id());
-            result.put("categoryView", categoryView.getData());
-            // 获取商品切换数据
-            Result<List<SpuSaleAttr>> spuSaleAttrListCheckBySku = productServiceClient.getSpuSaleAttrListCheckBySku(skuId,spuInfoAndImages.getSpuId());
-            result.put("spuSaleAttrList", spuSaleAttrListCheckBySku.getData());
-            Map<String, Object> skuValueIdsMap = productServiceClient.getSkuValueIdsMap(spuInfoAndImages.getSpuId());
-            // 转换为json
-            result.put("valuesSkuJson", JSON.toJSONString(skuValueIdsMap));
-            Result<List<SpuPoster>> spuPosterBySpuId = productServiceClient.findSpuPosterBySpuId(spuInfoAndImages.getSpuId());
+        CompletableFuture<SkuInfo> spkInfoTask = CompletableFuture.supplyAsync(() -> {
+            // spuinfo and images
+            SkuInfo skuInfo = productServiceClient.getSkuInfoAndImages(skuId).getData();
+            result.put("skuInfo", skuInfo);
+            return skuInfo;
+        }, executor);
 
-            result.put("spuPosterList", spuPosterBySpuId.getData());
-        }
+        CompletableFuture<Void> spuSaleAttrListCheckTask = spkInfoTask.thenAcceptAsync(spuInfo -> {
+            if (spuInfo != null && spuInfo.getSpuId() != null) {
+                // 获取商品切换数据
+                List<SpuSaleAttr> spuSaleAttrListCheckBySku = productServiceClient.getSpuSaleAttrListCheckBySku(skuId, spuInfo.getSpuId()).getData();
+                result.put("spuSaleAttrList", spuSaleAttrListCheckBySku);
+            }
+        }, executor);
+
+        CompletableFuture<Void> categoryViewTask = spkInfoTask.thenAcceptAsync(spuInfoAndImages -> {
+            if (spuInfoAndImages != null && spuInfoAndImages.getSpuId() != null) {
+                // 三级分类视图
+                BaseCategoryView categoryView = productServiceClient.getCategoryView(spuInfoAndImages.getCategory3Id()).getData();
+                result.put("categoryView", categoryView);
+            }
+        }, executor);
+
+        CompletableFuture<Void> valuesSkuJsonTask = spkInfoTask.thenAcceptAsync(spuInfoAndImages -> {
+            if (spuInfoAndImages != null && spuInfoAndImages.getSpuId() != null) {
+                Map<String, Object> skuValueIdsMap = productServiceClient.getSkuValueIdsMap(spuInfoAndImages.getSpuId());
+                // 转换为json
+                result.put("valuesSkuJson", JSON.toJSONString(skuValueIdsMap));
+            }
+        }, executor);
+
+        CompletableFuture<Void> posterTask = spkInfoTask.thenAcceptAsync(spuInfoAndImages -> {
+            if (spuInfoAndImages != null && spuInfoAndImages.getSpuId() != null) {
+                List<SpuPoster> spuPosterBySpuId = productServiceClient.findSpuPosterBySpuId(spuInfoAndImages.getSpuId()).getData();
+                result.put("spuPosterList", spuPosterBySpuId);
+            }
+        }, executor);
+
+        CompletableFuture<Void> priceTask = CompletableFuture.runAsync(() -> {
+            // 实时价格
+            BigDecimal skuPrice = productServiceClient.getSkuPrice(skuId).getData();
+            result.put("price", skuPrice);
+        }, executor);
+
+
+        CompletableFuture<Void> baseAttrInfosTask = CompletableFuture.runAsync(() -> {
+            // 平台属性
+            List<BaseAttrInfo> attrList = productServiceClient.getAttrList(skuId).getData();
+
+            // 处理数据
+            List<HashMap<String, String>> processAttrInfos = attrList.stream().map(baseAttrInfo -> {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("attrName", baseAttrInfo.getAttrName());
+                String valueName = baseAttrInfo.getAttrValueList().get(0).getValueName();
+                map.put("attrValue", valueName);
+                return map;
+            }).collect(Collectors.toList());
+            result.put("skuAttrList", processAttrInfos);
+        }, executor);
+
+        CompletableFuture.allOf(
+                spkInfoTask,
+                spuSaleAttrListCheckTask,
+                categoryViewTask,
+                valuesSkuJsonTask,
+                priceTask,
+                posterTask,
+                baseAttrInfosTask
+        ).join();
 
         return result;
     }

@@ -3,7 +3,7 @@ package com.wjl.gmall.product.controller.admin;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wjl.gmall.common.result.Result;
-import com.wjl.gmall.model.product.SkuInfo;
+import com.wjl.gmall.product.model.entity.SkuInfo;
 import com.wjl.gmall.product.service.SkuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

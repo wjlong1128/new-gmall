@@ -1,7 +1,7 @@
 package com.wjl.gmall.product.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.wjl.gmall.model.product.BaseCategoryView;
+import com.wjl.gmall.product.model.entity.BaseCategoryView;
 
 /*
  * @author Wang Jianlong

@@ -1,6 +1,6 @@
 package com.wjl.gamll.item.entity.vo;
 
-import com.wjl.gmall.model.product.*;
+import com.wjl.gmall.product.client.model.dto.*;
 import lombok.Data;
 
 import java.math.BigDecimal;

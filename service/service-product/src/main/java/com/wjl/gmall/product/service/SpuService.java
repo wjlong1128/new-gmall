@@ -1,7 +1,7 @@
 package com.wjl.gmall.product.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.wjl.gmall.model.product.*;
+import com.wjl.gmall.product.model.entity.*;
 
 import java.util.List;
 import java.util.Map;

@@ -23,6 +23,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.wjl.gamll</groupId>
             <artifactId>service-product-client</artifactId>
             <version>1.0-SNAPSHOT</version>

@@ -2,9 +2,9 @@ package com.wjl.gmall.product.controller.admin;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wjl.gmall.common.result.Result;
-import com.wjl.gmall.model.product.SpuImage;
-import com.wjl.gmall.model.product.SpuInfo;
-import com.wjl.gmall.model.product.SpuSaleAttr;
+import com.wjl.gmall.product.model.entity.SpuImage;
+import com.wjl.gmall.product.model.entity.SpuInfo;
+import com.wjl.gmall.product.model.entity.SpuSaleAttr;
 import com.wjl.gmall.product.service.SpuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
