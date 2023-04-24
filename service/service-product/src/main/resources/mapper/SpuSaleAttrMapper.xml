@@ -55,6 +55,6 @@
         where ssa.spu_id = #{spuId}
 
 
-        order by ssa.base_sale_attr_id, sav.id
+        order by sav.base_sale_attr_id, sav.id
     </select>
 </mapper>

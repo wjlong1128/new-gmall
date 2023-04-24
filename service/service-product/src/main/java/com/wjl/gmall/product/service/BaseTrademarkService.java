@@ -14,8 +14,17 @@ import java.util.List;
  */
 public interface BaseTrademarkService extends IService<BaseTrademark> {
     IPage<BaseTrademark> getBaseTrademarkList(Long page, Long limit);
-
+    /**
+     *  根据三级分类获取商家集合
+     * @param id
+     * @return
+     */
     List<BaseTrademark> findTrademarkListByCategory3Id(Long id);
 
+    /**
+     * 删除三级分类和商家品牌的关联信息
+     * @param category3Id
+     * @param trademarkId
+     */
     void removeCategoryTrademark(Long category3Id, Long trademarkId);
 }

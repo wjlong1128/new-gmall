@@ -22,6 +22,12 @@ public class ItemController {
     @Autowired
     private ItemServiceClient itemServiceClient;
 
+    /**
+     *  商品详情页
+     * @param skuId
+     * @param model
+     * @return
+     */
     @GetMapping("{skuId}.html")
     public String getItem(@PathVariable("skuId")Long skuId, Model model){
         Result<Map<String, Object>> detail = itemServiceClient.getSpuItemDetail(skuId);

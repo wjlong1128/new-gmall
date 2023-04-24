@@ -5,9 +5,11 @@
     <resultMap id="skuValueIdsMap" type="map" autoMapping="true">
 
     </resultMap>
+    <!-- 键和值要分清-->
     <select id="getSkuValueIdsMap" resultMap="skuValueIdsMap">
-        select sku_id,
-               group_concat(sale_attr_value_id order by sav.sale_attr_value_id asc separator '|') value_ids
+        select
+               group_concat(sale_attr_value_id order by ssa.base_sale_attr_id asc separator '|') value_ids,
+               sku_id
         from sku_sale_attr_value sav
                  inner join
              spu_sale_attr_value ssa

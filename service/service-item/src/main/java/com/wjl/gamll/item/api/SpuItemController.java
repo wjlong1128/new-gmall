@@ -23,6 +23,11 @@ public class SpuItemController {
     @Autowired
     private SkuItemService spuItemService;
 
+    /**
+     *  获取商品详情页数据
+     * @param skuId
+     * @return
+     */
     @GetMapping("{skuId}")
     public Result<Map<String, Object>> getSpuItemDetail(@PathVariable("skuId") Long skuId){
         Map<String, Object> details = spuItemService.getSkuDetailsBySkuId(skuId);

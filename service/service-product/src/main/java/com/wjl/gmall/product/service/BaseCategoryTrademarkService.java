@@ -21,5 +21,9 @@ public interface BaseCategoryTrademarkService extends IService<BaseCategoryTrade
      */
     List<BaseTrademark> findCurrentTrademarkList(Long category3Id);
 
+    /**
+     *  保存商家与分类的关联信息
+     * @param categoryTrademarkVo
+     */
     void save(CategoryTrademarkVo categoryTrademarkVo);
 }

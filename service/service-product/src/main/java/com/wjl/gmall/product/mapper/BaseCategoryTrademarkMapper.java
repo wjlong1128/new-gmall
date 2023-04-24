@@ -12,5 +12,10 @@ import java.util.List;
  * @description
  */
 public interface BaseCategoryTrademarkMapper extends BaseMapper<BaseCategoryTrademark> {
+    /**
+     *  根据三级分类获取商家id集合
+     * @param id
+     * @return
+     */
     List<Long> selectTrademarkIdsByCategory3Id(Long id);
 }

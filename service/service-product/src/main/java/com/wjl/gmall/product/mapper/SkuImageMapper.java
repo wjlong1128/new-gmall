@@ -13,5 +13,10 @@ import java.util.List;
  * @description
  */
 public interface SkuImageMapper extends BaseMapper<SkuImage> {
+    /**
+     *  根据skuId批量获取
+     * @param skuId
+     * @return
+     */
     List<SkuImage> getSkuImages(@Param("skuId") Long skuId);
 }

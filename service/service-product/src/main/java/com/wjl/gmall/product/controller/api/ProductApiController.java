@@ -40,7 +40,6 @@ public class ProductApiController {
      * @param skuId
      * @return
      */
-
     @GetMapping("getSkuInfo/{skuId}")
     public Result<SkuInfo> getSkuInfoAndImages(@PathVariable("skuId") Long skuId) {
         SkuInfo info = skuService.getSkuInfoAndImages(skuId);
@@ -48,7 +47,7 @@ public class ProductApiController {
     }
 
     /**
-     *  查询分类视图
+     *  查询分类视图  手机 > 手机通讯 > 智能手机
      * @param category3Id
      * @return
      */
@@ -72,7 +71,9 @@ public class ProductApiController {
 
 
     /**
-     *  查询spu销售属性，销售属性值，和sku选中的属性状态
+     * 获取指定spu下的一组销售属性以及对应的销售属性值集合
+     * 根据指定的skuId为默认选中
+     * 按照spu的基本销售属性排序
      * @param skuId
      * @param spuId
      * @return
@@ -96,7 +97,7 @@ public class ProductApiController {
     }
 
     /**
-     *  根据skuid获取平台属性和平台属性值
+     *  根据SkuId获取平台属性和对应的平台属性值
      */
     @GetMapping("/getAttrList/{skuId}")
     public Result<List<BaseAttrInfo>> getAttrList(@PathVariable("skuId") Long skuId){
@@ -106,7 +107,12 @@ public class ProductApiController {
 
 
     /**
-     * 根据spuId 查询map 集合属性
+     * 根据spuId 查询当前spu下所有的spu销售属性值组合id与skuId对应的map
+     * key 的组装按照spu的基本销售属性值id排序 (根据 -> getSpuSaleAttrListCheckBySku)
+     * 3732|3734: 21
+     * 3732|3735: 25
+     * 3733|3734: 26
+     * 3733|3735: 27
      * @param spuId
      * @return
      */

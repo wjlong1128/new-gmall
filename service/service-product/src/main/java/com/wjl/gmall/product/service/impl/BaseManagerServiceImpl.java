@@ -60,11 +60,22 @@ public class BaseManagerServiceImpl implements BaseManagerService {
         return baseCategory3Mapper.selectList(new LambdaQueryWrapper<BaseCategory3>().eq(BaseCategory3::getCategory2Id, id));
     }
 
+    /**
+     *  获取任一分类级别下的平台属性
+     * @param category1Id
+     * @param category2Id
+     * @param category3Id
+     * @return
+     */
     @Override
     public List<BaseAttrInfo> getAttrInfoList(Long category1Id, Long category2Id, Long category3Id) {
         return baseAttrInfoMapper.getAttrInfoList(category1Id, category2Id, category3Id);
     }
 
+    /**
+     *  保存或更新基本属性与基本属性值
+     * @param baseAttrInfo
+     */
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveAttrInfo(BaseAttrInfo baseAttrInfo) {
@@ -94,12 +105,22 @@ public class BaseManagerServiceImpl implements BaseManagerService {
 
     }
 
+    /**
+     *  根据基本属性id获取基本属性值集合
+     * @param attrId
+     * @return
+     */
     @Override
     public List<BaseAttrValue> getAttrValueList(Long attrId) {
         // 避免脏数据
         return getAttrInfoById(attrId).getAttrValueList();
     }
 
+    /**
+     *  根据基本属性id获取基本属性与基本属性值集合
+     * @param attrId
+     * @return
+     */
     @Override
     public BaseAttrInfo getAttrInfoById(Long attrId) {
         BaseAttrInfo attrInfo = baseAttrInfoMapper.selectById(attrId);
@@ -108,6 +129,11 @@ public class BaseManagerServiceImpl implements BaseManagerService {
         return attrInfo;
     }
 
+    /**
+     *  查询分类视图  手机 > 手机通讯 > 智能手机
+     * @param category3Id
+     * @return
+     */
     @Override
     public BaseCategoryView getCategoryView(Long category3Id) {
         return categoryViewMapper.selectById(category3Id);

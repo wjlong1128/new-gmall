@@ -21,66 +21,69 @@ import java.util.Map;
 public interface ProductServiceClient {
 
     /**
-     * 获取spu基本信息和图片集合
-     *
+     *  获取spu基本信息和图片集合
      * @param skuId
      * @return
      */
-
-    @GetMapping("/api/product/inner/getSkuInfo/{skuId}")
+    @GetMapping("getSkuInfo/{skuId}")
     public Result<SkuInfo> getSkuInfoAndImages(@PathVariable("skuId") Long skuId);
 
     /**
-     * 查询分类视图
-     *
+     *  查询分类视图  手机 > 手机通讯 > 智能手机
      * @param category3Id
      * @return
      */
-    @GetMapping("/api/product/inner/getCategoryView/{category3Id}")
+    @GetMapping("getCategoryView/{category3Id}")
     public Result<BaseCategoryView> getCategoryView(@PathVariable("category3Id") Long category3Id);
 
 
     /**
      * 获取最新价格
-     *
      * @param skuId
      * @return
      */
-    @GetMapping("/api/product/inner/getSkuPrice/{skuId}")
+    @GetMapping("getSkuPrice/{skuId}")
     public Result<BigDecimal> getSkuPrice(@PathVariable("skuId") Long skuId);
 
 
     /**
-     * 查询spu销售属性，销售属性值，和sku选中的属性状态
-     *
+     * 获取指定spu下的一组销售属性以及对应的销售属性值集合
+     * 根据指定的skuId为默认选中
+     * 按照spu的基本销售属性排序
      * @param skuId
      * @param spuId
      * @return
      */
-    @GetMapping("/api/product/inner/getSpuSaleAttrListCheckBySku/{spuId}/{skuId}")
+    @GetMapping("getSpuSaleAttrListCheckBySku/{spuId}/{skuId}")
     public Result<List<SpuSaleAttr>> getSpuSaleAttrListCheckBySku(
             @PathVariable("skuId") Long skuId,
             @PathVariable("spuId") Long spuId
     );
 
     /**
-     * 根据spu获取海报信息
+     *  根据spu获取海报信息
      */
-    @GetMapping("/api/product/inner/findSpuPosterBySpuId/{spuId}")
+    @GetMapping("/findSpuPosterBySpuId/{spuId}")
     public Result<List<SpuPoster>> findSpuPosterBySpuId(@PathVariable("spuId") Long spuId);
 
     /**
-     * 根据skuid获取平台属性和平台属性值
+     *  根据SkuId获取平台属性和对应的平台属性值
      */
-    @GetMapping("/api/product/inner/getAttrList/{skuId}")
+    @GetMapping("/getAttrList/{skuId}")
     public Result<List<BaseAttrInfo>> getAttrList(@PathVariable("skuId") Long skuId);
 
 
     /**
-     * 根据spuId 查询map 集合属性
+     * 根据spuId 查询当前spu下所有的spu销售属性值组合id与skuId对应的map
+     * key 的组装按照spu的基本销售属性值id排序 (根据 -> getSpuSaleAttrListCheckBySku)
+     * 3732|3734: 21
+     * 3732|3735: 25
+     * 3733|3734: 26
+     * 3733|3735: 27
      * @param spuId
      * @return
      */
-    @GetMapping("/api/product/inner/getSkuValueIdsMap/{spuId}")
-    Map<String, Object> getSkuValueIdsMap(@PathVariable("spuId") Long spuId);
+    @GetMapping("/getSkuValueIdsMap/{spuId}")
+    public Map getSkuValueIdsMap(@PathVariable("spuId") Long spuId);
+
 }

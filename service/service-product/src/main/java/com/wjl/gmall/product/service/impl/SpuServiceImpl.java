@@ -51,6 +51,10 @@ public class SpuServiceImpl implements SpuService {
         return infoPage;
     }
 
+    /**
+     * 保存spu基本信息以及关联到的一个spu所拥有的所有信息
+     * @param spuInfo
+     */
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveSpuInfo(SpuInfo spuInfo) {
@@ -96,6 +100,11 @@ public class SpuServiceImpl implements SpuService {
         }
     }
 
+    /**
+     *  获取spu的图片
+     * @param spuId
+     * @return
+     */
     @Override
     public List<SpuImage> spuImageListBySpuId(Long spuId) {
         SpuInfo spuInfo = spuInfoMapper.selectById(spuId);
@@ -107,6 +116,11 @@ public class SpuServiceImpl implements SpuService {
         return Collections.emptyList();
     }
 
+    /**
+     *  获取到spu的销售属性集合
+     * @param spuId
+     * @return
+     */
     @Override
     public List<SpuSaleAttr> spuSaleAttrListBySpuId(Long spuId) {
         SpuInfo spuInfo = spuInfoMapper.selectById(spuId);
@@ -126,6 +140,14 @@ public class SpuServiceImpl implements SpuService {
         return Collections.emptyList();
     }
 
+    /**
+     * 获取指定spu下的一组销售属性以及对应的销售属性值集合
+     * 根据指定的skuId为默认选中
+     * 按照spu的基本销售属性排序
+     * @param skuId
+     * @param spuId
+     * @return
+     */
     @Override
     public List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(Long skuId, Long spuId) {
         return spuSaleAttrMapper.getSpuSaleAttrListCheckBySku(skuId, spuId);
@@ -142,18 +164,30 @@ public class SpuServiceImpl implements SpuService {
         return Collections.emptyList();
     }
 
+    /**
+     *  根据SkuId获取平台属性和对应的平台属性值
+     */
     @Override
     public List<BaseAttrInfo> getAttrListBySku(Long skuId) {
         List<BaseAttrInfo> attrInfos = baseAttrInfoMapper.getAttrListBySkuId(skuId);
         return attrInfos;
     }
 
+
+    /**
+     * 根据spuId 查询当前spu下所有的spu销售属性值组合id与skuId对应的map
+     * key 的组装按照spu的基本销售属性值id排序 (根据 -> getSpuSaleAttrListCheckBySku)
+     * 3732|3734: 21
+     * 3732|3735: 25
+     * 3733|3734: 26
+     * 3733|3735: 27
+     */
     @Override
     public Map getSkuValueIdsMap(Long spuId) {
         List<Map> skuValueIdsMapList = skuSaleAttrValueMapper.getSkuValueIdsMap(spuId);
         HashMap map = new HashMap(skuValueIdsMapList.size());
         skuValueIdsMapList.forEach(m->{
-            map.put(m.get("sku_id"),m.get("value_ids"));
+            map.put(m.get("value_ids"),m.get("sku_id"));
         });
         return map;
 

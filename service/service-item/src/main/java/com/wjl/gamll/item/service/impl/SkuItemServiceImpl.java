@@ -26,6 +26,11 @@ public class SkuItemServiceImpl implements SkuItemService {
     @Autowired
     private ProductServiceClient productServiceClient;
 
+    /**
+     *  获取并且整理商品详情页数据
+     * @param skuId
+     * @return
+     */
     @Override
     public Map<String, Object> getSkuDetailsBySkuId(Long skuId) {
         Map<String, Object> result = new HashMap<>();
@@ -49,18 +54,18 @@ public class SkuItemServiceImpl implements SkuItemService {
         }).collect(Collectors.toList());
         result.put("skuAttrList", processAttrInfos);
 
-        SkuInfo spuAndImagesData = spuInfo.getData();
-        if (spuAndImagesData != null) {
+        SkuInfo spuInfoAndImages = spuInfo.getData();
+        if (spuInfoAndImages != null) {
             // 三级分类视图
-            Result<BaseCategoryView> categoryView = productServiceClient.getCategoryView(spuAndImagesData.getCategory3Id());
+            Result<BaseCategoryView> categoryView = productServiceClient.getCategoryView(spuInfoAndImages.getCategory3Id());
             result.put("categoryView", categoryView.getData());
             // 获取商品切换数据
-            Result<List<SpuSaleAttr>> spuSaleAttrListCheckBySku = productServiceClient.getSpuSaleAttrListCheckBySku(skuId,spuAndImagesData.getSpuId());
+            Result<List<SpuSaleAttr>> spuSaleAttrListCheckBySku = productServiceClient.getSpuSaleAttrListCheckBySku(skuId,spuInfoAndImages.getSpuId());
             result.put("spuSaleAttrList", spuSaleAttrListCheckBySku.getData());
-            Map<String, Object> skuValueIdsMap = productServiceClient.getSkuValueIdsMap(spuAndImagesData.getSpuId());
+            Map<String, Object> skuValueIdsMap = productServiceClient.getSkuValueIdsMap(spuInfoAndImages.getSpuId());
             // 转换为json
             result.put("valuesSkuJson", JSON.toJSONString(skuValueIdsMap));
-            Result<List<SpuPoster>> spuPosterBySpuId = productServiceClient.findSpuPosterBySpuId(spuAndImagesData.getSpuId());
+            Result<List<SpuPoster>> spuPosterBySpuId = productServiceClient.findSpuPosterBySpuId(spuInfoAndImages.getSpuId());
 
             result.put("spuPosterList", spuPosterBySpuId.getData());
         }

@@ -1003,7 +1003,7 @@ var item = new Vue({
         },
 
         spuSaleAttrFun(index, spuSaleAttrValueId) {
-           // debugger
+           debugger
             console.log('spuSaleAttrValueId:' + spuSaleAttrValueId)
             this.isAddCart = true
             //  JSON.parse() : Json 字符串转换为对象！ {"115|117":"44","114|117":"45"}
@@ -1013,7 +1013,7 @@ var item = new Vue({
             this.selectValuesSkus[index] = spuSaleAttrValueId // 115|117
 
             var valuesSku = this.selectValuesSkus.join('|')
-            //  3716|3718
+            // 3716|3718
             console.log('valuesSku:' + valuesSku)
 
             //查看新组装的数据是否存在skuId，如果存在跳到该页面，如果不存在控制选中状态

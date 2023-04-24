@@ -22,7 +22,7 @@ public class SkuController {
     private SkuService skuService;
 
     /**
-     *  保存一个sku（商品）信息
+     *  保存一个sku（商品）信息及其所关联的信息
      * @param skuInfo
      * @return
      */
@@ -47,7 +47,6 @@ public class SkuController {
      *
      * @return
      */
-
     @GetMapping("onSale/{skuId}")
     public Result onSale(@PathVariable("skuId") Long skuId) {
         skuService.onSale(skuId);

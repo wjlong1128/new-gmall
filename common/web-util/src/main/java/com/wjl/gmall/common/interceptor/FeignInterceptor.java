@@ -18,7 +18,6 @@ public class FeignInterceptor implements RequestInterceptor {
             //  添加header 数据
             requestTemplate.header("userTempId", request.getHeader("userTempId"));
             requestTemplate.header("userId", request.getHeader("userId"));
-
     }
 
 }

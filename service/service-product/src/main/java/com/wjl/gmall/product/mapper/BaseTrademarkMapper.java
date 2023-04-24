@@ -13,5 +13,10 @@ import java.util.List;
  * @description
  */
 public interface BaseTrademarkMapper extends BaseMapper<BaseTrademark> {
+    /**
+     *  根据id批量获取
+     * @param ids
+     * @return
+     */
     List<BaseTrademark> selectTrademarkByIds(@Param("ids") List<Long> ids);
 }

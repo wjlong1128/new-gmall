@@ -39,6 +39,12 @@ public class SkuServiceImpl extends ServiceImpl<SkuInfoMapper, SkuInfo> implemen
     @Autowired
     private SkuSaleAttrValueMapper skuSaleAttrValueMapper;
 
+
+    /**
+     *  保存一个sku（商品）信息及其所关联的信息
+     * @param skuInfo
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveSku(SkuInfo skuInfo) {
@@ -101,6 +107,11 @@ public class SkuServiceImpl extends ServiceImpl<SkuInfoMapper, SkuInfo> implemen
         updateById(info);
     }
 
+    /**
+     *  根据sku获取所属sku的基本信息以及sku图片信息
+     * @param skuId
+     * @return
+     */
     @Override
     public SkuInfo getSkuInfoAndImages(Long skuId) {
         SkuInfo skuInfo = this.getById(skuId);
@@ -115,6 +126,11 @@ public class SkuServiceImpl extends ServiceImpl<SkuInfoMapper, SkuInfo> implemen
         return skuInfo;
     }
 
+    /**
+     *  获取sku实时价格
+     * @param skuId
+     * @return
+     */
     @Override
     public BigDecimal getSkuPrice(Long skuId) {
         return this.baseMapper.getPrice(skuId);

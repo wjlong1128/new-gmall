@@ -35,6 +35,11 @@ public class BaseTrademarkServiceImpl extends ServiceImpl<BaseTrademarkMapper, B
         return page(new Page<>(page,limit),null);
     }
 
+    /**
+     *  根据三级分类获取商家集合
+     * @param id
+     * @return
+     */
     @Override
     public List<BaseTrademark> findTrademarkListByCategory3Id(Long id) {
         List<Long> ids =  baseCategoryTrademarkMapper.selectTrademarkIdsByCategory3Id(id);
@@ -45,6 +50,11 @@ public class BaseTrademarkServiceImpl extends ServiceImpl<BaseTrademarkMapper, B
         return list;
     }
 
+    /**
+     * 删除三级分类和商家品牌的关联信息
+     * @param category3Id
+     * @param trademarkId
+     */
     @Override
     public void removeCategoryTrademark(Long category3Id, Long trademarkId) {
         QueryWrapper<BaseCategoryTrademark> wrapper = new QueryWrapper<>();

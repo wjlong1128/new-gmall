@@ -26,6 +26,11 @@ public class BaseCategoryTrademarkServiceImpl extends ServiceImpl<BaseCategoryTr
     @Autowired
     private BaseTrademarkService trademarkService;
 
+    /**
+     *  查询出未被此分类关联的企业
+     * @param category3Id
+     * @return
+     */
     @Override
     public List<BaseTrademark> findCurrentTrademarkList(Long category3Id) {
         List<Long> ids = this.baseMapper.selectTrademarkIdsByCategory3Id(category3Id);
@@ -35,6 +40,10 @@ public class BaseCategoryTrademarkServiceImpl extends ServiceImpl<BaseCategoryTr
         return list;
     }
 
+    /**
+     *  保存商家与分类的关联信息
+     * @param categoryTrademarkVo
+     */
     @Override
     public void save(CategoryTrademarkVo categoryTrademarkVo) {
         List<Long> trademarkIdList = categoryTrademarkVo.getTrademarkIdList();
