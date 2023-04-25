@@ -1,0 +1,68 @@
+{
+  "goods": {
+    "mappings": {
+      "properties": {
+        "attrs": {
+          "type": "nested",
+          "properties": {
+            "attrId": {
+              "type": "long"
+            },
+            "attrName": {
+              "type": "keyword"
+            },
+            "attrValue": {
+              "type": "keyword"
+            }
+          }
+        },
+        "category1Id": {
+          "type": "long"
+        },
+        "category1Name": {
+          "type": "keyword"
+        },
+        "category2Id": {
+          "type": "long"
+        },
+        "category2Name": {
+          "type": "keyword"
+        },
+        "category3Id": {
+          "type": "long"
+        },
+        "category3Name": {
+          "type": "keyword"
+        },
+        "createTime": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss"
+        },
+        "defaultImg": {
+          "type": "keyword",
+          "index": false
+        },
+        "hotScore": {
+          "type": "long"
+        },
+        "price": {
+          "type": "double"
+        },
+        "title": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_smart"
+        },
+        "tmId": {
+          "type": "long"
+        },
+        "tmLogoUrl": {
+          "type": "keyword"
+        },
+        "tmName": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

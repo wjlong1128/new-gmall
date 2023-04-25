@@ -71,7 +71,7 @@ public interface ProductServiceClient {
     public Result<List<SpuPoster>> findSpuPosterBySpuId(@PathVariable("spuId") Long spuId);
 
     /**
-     * 根据SkuId获取平台属性和对应的平台属性值
+     * 根据SkuId获取具体的平台属性和对应的平台属性值
      */
     @GetMapping("/api/product/inner/getAttrList/{skuId}")
     public Result<List<BaseAttrInfo>> getAttrList(@PathVariable("skuId") Long skuId);
@@ -99,4 +99,13 @@ public interface ProductServiceClient {
     @GetMapping("/api/product/inner/getBaseCategoryList")
     public Result<List<CategoryVO>> getBaseCategoryList();
 
+
+    /**
+     * 获取品牌对象
+     *
+     * @param tmId
+     * @return
+     */
+    @GetMapping("/api/product/inner/getTrademark/{tmId}")
+    public Result<BaseTrademark> getTrademark(@PathVariable("tmId") Long tmId);
 }

@@ -19,46 +19,51 @@ import java.util.Map;
 public class ProductServiceDegradeClientFallbackFactory implements FallbackFactory<ProductServiceClient> {
     @Override
     public ProductServiceClient create(Throwable cause) {
-      return new ProductServiceClient() {
-          @Override
-          public Result<SkuInfo> getSkuInfoAndImages(Long skuId) {
-              return Result.fail();
-          }
+        return new ProductServiceClient() {
+            @Override
+            public Result<SkuInfo> getSkuInfoAndImages(Long skuId) {
+                return Result.fail();
+            }
 
-          @Override
-          public Result<BaseCategoryView> getCategoryView(Long category3Id) {
-              return Result.fail();
-          }
+            @Override
+            public Result<BaseCategoryView> getCategoryView(Long category3Id) {
+                return Result.fail();
+            }
 
-          @Override
-          public Result<BigDecimal> getSkuPrice(Long skuId) {
-              return Result.fail();
-          }
+            @Override
+            public Result<BigDecimal> getSkuPrice(Long skuId) {
+                return Result.fail();
+            }
 
-          @Override
-          public Result<List<SpuSaleAttr>> getSpuSaleAttrListCheckBySku(Long skuId, Long spuId) {
-              return Result.fail();
-          }
+            @Override
+            public Result<List<SpuSaleAttr>> getSpuSaleAttrListCheckBySku(Long skuId, Long spuId) {
+                return Result.fail();
+            }
 
-          @Override
-          public Result<List<SpuPoster>> findSpuPosterBySpuId(Long spuId) {
-              return Result.fail();
-          }
+            @Override
+            public Result<List<SpuPoster>> findSpuPosterBySpuId(Long spuId) {
+                return Result.fail();
+            }
 
-          @Override
-          public Result<List<BaseAttrInfo>> getAttrList(Long skuId) {
-              return Result.fail();
-          }
+            @Override
+            public Result<List<BaseAttrInfo>> getAttrList(Long skuId) {
+                return Result.fail();
+            }
 
-          @Override
-          public Map getSkuValueIdsMap(Long spuId) {
-              return null;
-          }
+            @Override
+            public Map getSkuValueIdsMap(Long spuId) {
+                return null;
+            }
 
-          @Override
-          public Result<List<CategoryVO>> getBaseCategoryList() {
-              return Result.fail();
-          }
-      };
+            @Override
+            public Result<List<CategoryVO>> getBaseCategoryList() {
+                return Result.fail();
+            }
+
+            @Override
+            public Result<BaseTrademark> getTrademark(Long tmId) {
+                return Result.fail();
+            }
+        };
     }
 }

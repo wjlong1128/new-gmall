@@ -1,0 +1,212 @@
+// POST gmall/_search
+{
+  "from": 0,
+  "size": 3,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "tmId": {
+              "value": "2",
+              "boost": 1
+            }
+          }
+        },
+        {
+          "terms": {
+            "category3Id": [
+              "61"
+            ],
+            "boost": 1
+          }
+        },
+        {
+          "bool": {
+            "must": [
+              {
+                "nested": {
+                  "query": {
+                    "bool": {
+                      "must": [
+                        {
+                          "terms": {
+                            "attrs.attrId": [
+                              "23"
+                            ],
+                            "boost": 1
+                          }
+                        },
+                        {
+                          "terms": {
+                            "attrs.attrValue": [
+                              "4G"
+                            ],
+                            "boost": 1
+                          }
+                        }
+                      ],
+                      "adjust_pure_negative": true,
+                      "boost": 1
+                    }
+                  },
+                  "path": "attrs",
+                  "ignore_unmapped": false,
+                  "score_mode": "none",
+                  "boost": 1
+                }
+              }
+            ],
+            "adjust_pure_negative": true,
+            "boost": 1
+          }
+        }
+      ],
+      "adjust_pure_negative": true,
+      "boost": 1
+    }
+  },
+  "_source": {
+    "includes": [
+      "id",
+      "defaultImg",
+      "title",
+      "price"
+    ],
+    "excludes": []
+  },
+  "sort": [
+    {
+      "hotScore": {
+        "order": "desc"
+      }
+    }
+  ],
+  "aggregations": {
+    "tmIdAgg": {
+      "terms": {
+        "field": "tmId",
+        "size": 30,
+        "min_doc_count": 1,
+        "shard_min_doc_count": 0,
+        "show_term_doc_count_error": false,
+        "order": [
+          {
+            "_count": "desc"
+          },
+          {
+            "_key": "asc"
+          }
+        ]
+      },
+      "aggregations": {
+        "tmNameAgg": {
+          "terms": {
+            "field": "tmName",
+            "size": 30,
+            "min_doc_count": 1,
+            "shard_min_doc_count": 0,
+            "show_term_doc_count_error": false,
+            "order": [
+              {
+                "_count": "desc"
+              },
+              {
+                "_key": "asc"
+              }
+            ]
+          }
+        },
+        "tmLogoUrlAgg": {
+          "terms": {
+            "field": "tmLogoUrl",
+            "size": 30,
+            "min_doc_count": 1,
+            "shard_min_doc_count": 0,
+            "show_term_doc_count_error": false,
+            "order": [
+              {
+                "_count": "desc"
+              },
+              {
+                "_key": "asc"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "attrAgg": {
+      "nested": {
+        "path": "attrs"
+      },
+      "aggregations": {
+        "attrIdAgg": {
+          "terms": {
+            "field": "attrs.attrId",
+            "size": 30,
+            "min_doc_count": 1,
+            "shard_min_doc_count": 0,
+            "show_term_doc_count_error": false,
+            "order": [
+              {
+                "_count": "desc"
+              },
+              {
+                "_key": "asc"
+              }
+            ]
+          },
+          "aggregations": {
+            "attrNameAgg": {
+              "terms": {
+                "field": "attrs.attrName",
+                "size": 30,
+                "min_doc_count": 1,
+                "shard_min_doc_count": 0,
+                "show_term_doc_count_error": false,
+                "order": [
+                  {
+                    "_count": "desc"
+                  },
+                  {
+                    "_key": "asc"
+                  }
+                ]
+              }
+            },
+            "attrValueAgg": {
+              "terms": {
+                "field": "attrs.attrValue",
+                "size": 30,
+                "min_doc_count": 1,
+                "shard_min_doc_count": 0,
+                "show_term_doc_count_error": false,
+                "order": [
+                  {
+                    "_count": "desc"
+                  },
+                  {
+                    "_key": "asc"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "highlight": {
+    "pre_tags": [
+      "<span style=color:red>"
+    ],
+    "post_tags": [
+      "</span>"
+    ],
+    "fields": {
+      "title": {
+      }
+    }
+  }
+}

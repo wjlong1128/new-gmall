@@ -4,6 +4,7 @@ import com.wjl.gmall.common.result.Result;
 import com.wjl.gmall.product.model.entity.*;
 import com.wjl.gmall.product.model.vo.CategoryVO;
 import com.wjl.gmall.product.service.BaseManagerService;
+import com.wjl.gmall.product.service.BaseTrademarkService;
 import com.wjl.gmall.product.service.SkuService;
 import com.wjl.gmall.product.service.SpuService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,14 @@ public class ProductApiController {
     @Autowired
     private SpuService spuService;
 
+    @Autowired
+    private BaseTrademarkService baseTrademarkService;
+
 
     /**
      *  获取spu基本信息和图片集合
      * @param skuId
-     * @return
+     * @return // TODO 只能查询上架的商品
      */
     @GetMapping("getSkuInfo/{skuId}")
     public Result<SkuInfo> getSkuInfoAndImages(@PathVariable("skuId") Long skuId) {
@@ -98,7 +102,7 @@ public class ProductApiController {
     }
 
     /**
-     *  根据SkuId获取平台属性和对应的平台属性值
+     *  根据SkuId获取具体的平台属性和对应的平台属性值
      */
     @GetMapping("/getAttrList/{skuId}")
     public Result<List<BaseAttrInfo>> getAttrList(@PathVariable("skuId") Long skuId){
@@ -123,9 +127,24 @@ public class ProductApiController {
     }
 
 
+    /**
+     *  查询所有分类
+     * @return
+     */
     @GetMapping("getBaseCategoryList")
     public Result<List<CategoryVO>> getBaseCategoryList(){
         List<CategoryVO> categoryList = baseManagerService.getCategoryList();
         return Result.ok(categoryList);
+    }
+
+    /**
+     *  获取品牌对象
+     * @param tmId
+     * @return
+     */
+    @GetMapping("getTrademark/{tmId}")
+    public Result<BaseTrademark> getTrademark(@PathVariable("tmId")Long tmId){
+        BaseTrademark baseTrademark = baseTrademarkService.getById(tmId);
+        return Result.ok(baseTrademark);
     }
 }
