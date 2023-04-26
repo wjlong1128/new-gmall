@@ -1,32 +1,32 @@
-
 var request = axios.create({
-    baseURL:'http://api.gmall.com',
-    timeout:100000
+    baseURL: 'http://api.gmall.com',
+    timeout: 100000
 });
 
 //添加一个请求拦截器
-request.interceptors.request.use(function(config){
+request.interceptors.request.use(function (config) {
     //在请求发出之前进行一些操作
     //debugger
-    if(auth.getToken()) {
+    if (auth.getToken()) {
         config.headers['token'] = auth.getToken();
+        config.headers['Authorization'] = 'Bearer ' + auth.getToken();
     }
-    if(auth.getUserTempId()) {
+    if (auth.getUserTempId()) {
         config.headers['userTempId'] = auth.getUserTempId();
     }
     return config;
-},function(error){
+}, function (error) {
     //Do something with request error
     return Promise.reject(error);
 });
 //添加一个响应拦截器
-request.interceptors.response.use(function(response){
+request.interceptors.response.use(function (response) {
     //在这里对返回的数据进行处理
     // debugger
     console.log(JSON.stringify(response))
 
     if (response.data.code == 208) {
-        window.location.href = 'http://passport.gmall.com/login.html?originUrl='+window.location.href
+        window.location.href = 'http://passport.gmall.com/login.html?originUrl=' + window.location.href
     } else {
         // debugger
         if (response.data.code == 200) {
@@ -42,7 +42,7 @@ request.interceptors.response.use(function(response){
             }
         }
     }
-},function(error){
+}, function (error) {
     //Do something with response error
     return Promise.reject(error);
 })

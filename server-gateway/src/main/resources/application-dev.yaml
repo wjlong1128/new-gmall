@@ -2,7 +2,7 @@ server:
   port: 80
 spring:
   redis:
-    host: localhost
+    host: 192.168.56.103
     port: 6379
     database: 0
     timeout: 1800000
@@ -84,4 +84,4 @@ spring:
           predicates:
             - Host=comment.gmall.com
 authUrls:
-  url: trade.html,myOrder.html #,list.html, addCart.html # 用户访问该控制器的时候，会被拦截跳转到登录！
+  url: trade.html,myOrder.html ,list.html #, addCart.html # 用户访问该控制器的时候，会被拦截跳转到登录！

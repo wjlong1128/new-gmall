@@ -1,12 +1,18 @@
-package com.wjl.gmall.model.user;
+package com.wjl.gmall.user.model.entity;
 
-import com.wjl.gmall.model.base.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.wjl.gmall.model.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/*
+ * @author Wang Jianlong
+ * @version 1.0.0
+ * @date 2023/4/26
+ * @description
+ */
 @Data
 @ApiModel(description = "userInfo")
 @TableName("user_info")

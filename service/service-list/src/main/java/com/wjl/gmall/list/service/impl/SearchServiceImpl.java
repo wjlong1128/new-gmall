@@ -309,6 +309,8 @@ public class SearchServiceImpl implements SearchService {
         // 指定要搜索的字段         参数1 要搜索的字段， 参数2 要排除的字段
         sourceBuilder.fetchSource(new String[]{"id", "defaultImg", "title", "price"}, new String[]{});
         System.out.println(sourceBuilder.toString());
+        // Fuck
+        // request.source(sourceBuilder);
         return request;
     }
 

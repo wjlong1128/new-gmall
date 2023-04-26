@@ -28,7 +28,6 @@ public class ListApiController {
 
     /**
      * 商品上架
-     *
      * @param skuId
      * @return
      */
@@ -75,7 +74,7 @@ public class ListApiController {
      * @return
      */
     @PostMapping("search")
-    public Result<SearchResponseVo> search(SearchParam param){
+    public Result<SearchResponseVo> search(@RequestBody SearchParam param){
         SearchResponseVo responseVo = searchService.search(param);
         return Result.ok(responseVo);
     }
