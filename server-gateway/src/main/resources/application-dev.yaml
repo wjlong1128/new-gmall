@@ -84,4 +84,4 @@ spring:
           predicates:
             - Host=comment.gmall.com
 authUrls:
-  url: trade.html,myOrder.html ,list.html #, addCart.html # 用户访问该控制器的时候，会被拦截跳转到登录！
+  url: trade.html,myOrder.html #, list.html #, addCart.html # 用户访问该控制器的时候，会被拦截跳转到登录！

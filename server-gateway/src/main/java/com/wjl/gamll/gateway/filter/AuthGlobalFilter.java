@@ -80,10 +80,26 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
                 }
             }
             // 没有登录，但是也没有访问权限接口
+            // 获取用户临时id
+            String userTempId = this.getUserTempId(request);
+            if (StringUtils.hasText(userTempId)){
+                request.mutate().header("userTempId",userTempId);
+            }
             return chain.filter(exchange);
         }
 
+        // 登录了的用户 将userId 存放请求头中
+        request.mutate().header("userId", userId).build();
         return chain.filter(exchange);
+    }
+
+    private String getUserTempId(ServerHttpRequest request) {
+        String userTempId = "";
+        List<String> list = request.getHeaders().get("userTempId");
+        if (!CollectionUtils.isEmpty(list)) {
+            userTempId = list.get(0);
+        }
+        return userTempId;
     }
 
     /**
@@ -112,6 +128,9 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         }
         String key = RedisConst.USER_LOGIN_KEY_PREFIX + token;
         String json = stringRedisTemplate.opsForValue().get(key);
+        if (!StringUtils.hasText(json)){
+            return "";
+        }
         AuthDTO auth = AuthDTO.jsonToAuth(json);
         String ip = IpUtil.getGatwayIpAddress(request);
         headers = request.getHeaders().get(HttpHeaders.USER_AGENT);

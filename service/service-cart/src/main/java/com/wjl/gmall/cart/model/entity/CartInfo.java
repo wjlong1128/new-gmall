@@ -1,4 +1,4 @@
-package com.wjl.gmall.model.cart;
+package com.wjl.gmall.cart.model.entity;
 
 import com.wjl.gmall.model.activity.CouponInfo;
 import com.wjl.gmall.model.base.BaseEntity;

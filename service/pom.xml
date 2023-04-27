@@ -16,6 +16,8 @@
         <module>service-product</module>
         <module>service-list</module>
         <module>service-user</module>
+        <module>service-cart</module>
+        <module>service-order</module>
     </modules>
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
