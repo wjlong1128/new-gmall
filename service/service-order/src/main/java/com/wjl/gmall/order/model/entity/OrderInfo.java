@@ -1,4 +1,4 @@
-package com.wjl.gmall.model.order;
+package com.wjl.gmall.order.model.entity;
 
 import com.wjl.gmall.model.activity.ActivityRule;
 import com.wjl.gmall.model.activity.CouponInfo;

@@ -9,7 +9,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /*
  * @author Wang Jianlong
@@ -110,4 +112,16 @@ public class CartController {
         return cartService.getCartCheckedList(userId);
     }
 
+
+    /**
+     *  更新用户的购物车最新价格
+     * @param changeSkuIds
+     * @param userId
+     * @return
+     */
+    @PostMapping("inner/updateCartCache/{userId}")
+    public Result updateCartCache(@RequestBody Map<Long, BigDecimal> changeSkuIds, @PathVariable("userId") String userId){
+        cartService.updateCartCache(changeSkuIds,userId);
+        return Result.ok();
+    }
 }

@@ -82,7 +82,7 @@ public class CartServiceImpl implements CartService {
         info.setUpdateTime(new Date());
         SkuInfo sku = productServiceClient.getSkuInfoAndImages(skuId).getData();
         info.setSkuName(sku.getSkuName());
-        info.setCartPrice(sku.getPrice());
+        info.setSkuPrice(sku.getPrice());
         info.setCartPrice(sku.getPrice());
         info.setImgUrl(sku.getSkuDefaultImg());
         info.setSkuNum(skuNum);
@@ -186,6 +186,12 @@ public class CartServiceImpl implements CartService {
         stringRedisTemplate.opsForHash().delete(cartKey, skuId.toString());
     }
 
+    /**
+     * 获取选中的sku
+     *
+     * @param userId
+     * @return
+     */
     @Override
     public List<CartInfo> getCartCheckedList(Long userId) {
         ArrayList<CartInfo> cartInfos = new ArrayList<>();
@@ -193,10 +199,30 @@ public class CartServiceImpl implements CartService {
         if (isNotEmpty) {
             return cartInfos
                     .stream()
-                    .filter(item -> item.getIsChecked().equals(1))
+                    .filter(item -> {
+                        // 被选中跳转结算页，就将价格调为最新的 返回
+                        BigDecimal price = productServiceClient.getSkuPrice(item.getSkuId()).getData();
+                        item.setCartPrice(price);
+                        return item.getIsChecked().equals(1);
+                    })
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public void updateCartCache(Map<Long, BigDecimal> changeSkuIds, String userId) {
+        String key = getKey(userId);
+        BoundHashOperations<String, String, String> bound = stringRedisTemplate.boundHashOps(key);
+        for (Map.Entry<Long, BigDecimal> entry : changeSkuIds.entrySet()) {
+            Long skuId = entry.getKey();
+            BigDecimal newPrice = entry.getValue();
+            String json = bound.get(skuId.toString());
+            CartInfo cartInfo = JSON.parseObject(json, CartInfo.class);
+            cartInfo.setSkuPrice(newPrice);
+            cartInfo.setCartPrice(newPrice);
+            bound.put(skuId.toString(), JSON.toJSONString(cartInfo));
+        }
     }
 
 

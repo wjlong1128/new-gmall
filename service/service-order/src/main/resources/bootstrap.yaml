@@ -27,5 +27,14 @@ spring:
       maximum-pool-size: 12
       minimum-idle: 10
       pool-name: GuliHikariPool
+#mybatis-plus:
+#  mapper-locations: classpath:/mapper/order/*.xml
 ware:
   url: http://localhost:9001
+gmall:
+  default-thread-pool:
+    core-size: 50
+    keep-alive-time: 30
+    unit: seconds
+    max-size: 500
+    queue-size: 10000

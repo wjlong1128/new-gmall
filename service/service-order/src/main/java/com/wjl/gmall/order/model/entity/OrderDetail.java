@@ -1,4 +1,4 @@
-package com.wjl.gmall.model.order;
+package com.wjl.gmall.order.model.entity;
 
 import com.wjl.gmall.model.base.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableField;

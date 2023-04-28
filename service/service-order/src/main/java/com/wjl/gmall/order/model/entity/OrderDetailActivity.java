@@ -1,4 +1,4 @@
-package com.wjl.gmall.model.order;
+package com.wjl.gmall.order.model.entity;
 
 import com.wjl.gmall.model.base.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -10,9 +10,9 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-@ApiModel(description = "订单优惠券关联表")
-@TableName("order_detail_coupon")
-public class OrderDetailCoupon extends BaseEntity {
+@ApiModel(description = "订单活动关联表")
+@TableName("order_detail_activity")
+public class OrderDetailActivity extends BaseEntity {
    
    private static final long serialVersionUID = 1L;
    
@@ -24,9 +24,13 @@ public class OrderDetailCoupon extends BaseEntity {
    @TableField("order_detail_id")
    private Long orderDetailId;
 
-   @ApiModelProperty(value = "购物券ID")
-   @TableField("coupon_id")
-   private Long couponId;
+   @ApiModelProperty(value = "活动ID")
+   @TableField("activity_id")
+   private Long activityId;
+
+   @ApiModelProperty(value = "活动规则")
+   @TableField("activity_rule")
+   private Long activityRule;
 
    @ApiModelProperty(value = "skuID")
    @TableField("sku_id")

@@ -2,7 +2,9 @@ package com.wjl.gmall.cart.service;
 
 import com.wjl.gmall.cart.model.entity.CartInfo;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /*
  * @author Wang Jianlong
@@ -39,4 +41,6 @@ public interface CartService {
     void deleteCartSku(Long skuId, String userId);
 
     List<CartInfo> getCartCheckedList(Long userId);
+
+    void updateCartCache(Map<Long, BigDecimal> changeSkuIds, String userId);
 }

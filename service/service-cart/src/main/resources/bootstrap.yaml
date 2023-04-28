@@ -27,4 +27,4 @@ spring:
         server-addr: ${spring.cloud.nacos.discovery.server-addr}
 
 server:
-  port: 8201
+  port: 8101
