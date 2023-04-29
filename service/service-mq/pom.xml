@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>service-product</artifactId>
+    <artifactId>service-mq</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -22,17 +22,6 @@
             <groupId>com.wjl.gamll</groupId>
             <artifactId>mq-util</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.wjl.gamll</groupId>
-            <artifactId>service-file-client</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -53,14 +42,11 @@
     </dependencies>
 
     <build>
-        <finalName>service-product</finalName>
+        <finalName>service-mq</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>com.wjl.gmall.product.ProductApplication</mainClass>
-                </configuration>
             </plugin>
         </plugins>
     </build>

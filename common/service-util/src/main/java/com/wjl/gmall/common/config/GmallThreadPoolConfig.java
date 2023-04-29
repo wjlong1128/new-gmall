@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
  * @date 2023/4/25
  * @description
  */
-@Configuration
 @Data
+@Configuration
 @ConfigurationProperties(prefix = "gmall.default-thread-pool")
 public class GmallThreadPoolConfig {
 

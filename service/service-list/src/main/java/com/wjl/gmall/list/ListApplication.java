@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.ComponentScan;
 
 /*
  * @author Wang Jianlong
@@ -12,6 +13,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @date 2023/4/25
  * @description
  */
+@ComponentScan("com.wjl.gmall")
 @EnableFeignClients(basePackages = "com.wjl.gmall",defaultConfiguration = ProductDefaultConfig.class)
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 public class ListApplication {

@@ -22,8 +22,8 @@ spring:
     port: 5672
     username: guest
     password: guest
-    publisher-confirm-type: correlated
-    publisher-returns: true
+    publisher-confirm-type: correlated # 到达交换机
+    publisher-returns: true # 到达队列
     listener:
       simple:
         acknowledge-mode: manual #默认情况下消息消费者是自动确认消息的，如果要手动确认消息则需要修改确认模式为manual

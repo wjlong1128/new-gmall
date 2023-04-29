@@ -3,6 +3,8 @@ package com.wjl.gmall.product.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wjl.gmall.common.constant.RedisConst;
+import com.wjl.gmall.common.constants.MqConst;
+import com.wjl.gmall.common.service.RabbitService;
 import com.wjl.gmall.product.model.entity.SkuAttrValue;
 import com.wjl.gmall.product.model.entity.SkuImage;
 import com.wjl.gmall.product.model.entity.SkuInfo;
@@ -58,6 +60,9 @@ public class SkuServiceImpl extends ServiceImpl<SkuInfoMapper, SkuInfo> implemen
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private RabbitService rabbitService;
 
 
     /**
@@ -117,6 +122,7 @@ public class SkuServiceImpl extends ServiceImpl<SkuInfoMapper, SkuInfo> implemen
         info.setIsSale(1);
         info.setId(skuId);
         updateById(info);
+        rabbitService.sendMessage(MqConst.EXCHANGE_DIRECT_GOODS,MqConst.ROUTING_GOODS_UPPER,skuId);
     }
 
     /**
@@ -130,6 +136,7 @@ public class SkuServiceImpl extends ServiceImpl<SkuInfoMapper, SkuInfo> implemen
         info.setIsSale(0);
         info.setId(skuId);
         updateById(info);
+        rabbitService.sendMessage(MqConst.EXCHANGE_DIRECT_GOODS,MqConst.ROUTING_GOODS_LOWER,skuId);
     }
 
     /**
@@ -164,7 +171,7 @@ public class SkuServiceImpl extends ServiceImpl<SkuInfoMapper, SkuInfo> implemen
         // 3.1 上锁
         lock.lock();
         try {
-            // 3.2 再次判断缓存中有没有数据 避免并发情况下循环查库
+            // 3.2 再次判断缓存中有没有数据 避免并发情况下多余查库
             json = redisTemplate.opsForValue().get(key);
             if (StringUtils.hasText(json)) {
                 return JSON.parseObject(json, SkuInfo.class);
@@ -190,7 +197,6 @@ public class SkuServiceImpl extends ServiceImpl<SkuInfoMapper, SkuInfo> implemen
 
     /**
      * 数据库查询
-     *
      * @param skuId
      * @return
      */
