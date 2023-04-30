@@ -2,6 +2,7 @@ package com.wjl.gmall.order.client.impl;
 
 import com.wjl.gmall.common.result.Result;
 import com.wjl.gmall.order.client.OrderServiceClient;
+import com.wjl.gmall.order.model.dto.OrderInfo;
 import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,11 @@ public class OrderDegradeServiceClienFallbackFactory implements FallbackFactory<
         return new OrderServiceClient() {
             @Override
             public Result<Map<String, Object>> trade() {
+                return Result.fail();
+            }
+
+            @Override
+            public Result<OrderInfo> getOrderInfo(Long orderId) {
                 return Result.fail();
             }
         };

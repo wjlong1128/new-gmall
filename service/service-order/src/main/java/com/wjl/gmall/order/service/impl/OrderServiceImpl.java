@@ -1,12 +1,16 @@
 package com.wjl.gmall.order.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wjl.gmall.cart.client.CartServiceClient;
 import com.wjl.gmall.cart.model.dto.CartInfo;
+import com.wjl.gmall.common.service.RabbitService;
 import com.wjl.gmall.model.enums.OrderStatus;
 import com.wjl.gmall.model.enums.PaymentWay;
 import com.wjl.gmall.model.enums.ProcessStatus;
+import com.wjl.gmall.order.config.OrderCancelMqConfig;
 import com.wjl.gmall.order.mapper.OrderDetailMapper;
 import com.wjl.gmall.order.mapper.OrderInfoMapper;
 import com.wjl.gmall.order.model.entity.OrderDetail;
@@ -38,7 +42,7 @@ import java.util.stream.Collectors;
  * @description
  */
 @Service
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> implements OrderService {
 
     @Autowired
     private UserServiceClient userServiceClient;
@@ -63,6 +67,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private RabbitService rabbitService;
 
 
     @Value("${ware.url}")
@@ -184,7 +191,10 @@ public class OrderServiceImpl implements OrderService {
         });
 
         // 删除购物车相关数据
-        return orderInfo.getId();
+        Long orderInfoId = orderInfo.getId();
+        // 发送延时消息监控订单状态
+        rabbitService.sendMessage(OrderCancelMqConfig.ORDER_CANCEL_EXCHANGE, OrderCancelMqConfig.ORDER_CANCEL_KEY, orderInfoId);
+        return orderInfoId;
     }
 
     @Override
@@ -249,5 +259,50 @@ public class OrderServiceImpl implements OrderService {
             record.setOrderStatusName(OrderStatus.getStatusNameByStatus(record.getOrderStatus()));
         }
         return ordersPage;
+    }
+
+    @Override
+    public void execExpireOrder(Long orderInfoId) {
+        this.updateOrderProcessStatus(orderInfoId, ProcessStatus.CLOSED);
+    }
+
+    @Transactional
+    @Override
+    public void updateOrderProcessStatus(Long orderInfoId, ProcessStatus status) {
+        OrderInfo info = new OrderInfo();
+        info.setId(orderInfoId);
+        info.setOrderStatus(status.getOrderStatus().name());
+        info.setProcessStatus(status.getOrderStatus().name());
+        updateById(info);
+    }
+
+    @Override
+    public OrderInfo getOrderInfo(Long orderId) {
+        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderInfo::getId, orderId);
+        OrderInfo info = this.getOne(queryWrapper);
+        if (info != null) {
+            LambdaQueryWrapper<OrderDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(OrderDetail::getOrderId, orderId);
+            List<OrderDetail> orderDetailList = orderDetailMapper.selectList(detailWrapper);
+            info.setOrderDetailList(orderDetailList);
+        }
+        info.sumTotalAmount();
+        return info;
+    }
+
+    @Override
+    public OrderInfo getOrderInfoWithStatus(Long orderId, OrderStatus status) {
+        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderInfo::getId, orderId).eq(OrderInfo::getOrderStatus, status.name()).eq(OrderInfo::getProcessStatus, status.name());
+        OrderInfo info = this.getOne(queryWrapper);
+        if (info != null) {
+            LambdaQueryWrapper<OrderDetail> detailWrapper = new LambdaQueryWrapper<>();
+            detailWrapper.eq(OrderDetail::getOrderId, orderId);
+            List<OrderDetail> orderDetailList = orderDetailMapper.selectList(detailWrapper);
+            info.setOrderDetailList(orderDetailList);
+        }
+        info.sumTotalAmount();
+        return info;
     }
 }

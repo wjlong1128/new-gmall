@@ -1,6 +1,6 @@
 //
 //
-package com.wjl.gmall.model.payment;
+package com.wjl.gmall.pay.model.entity;
 
 import com.wjl.gmall.model.base.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
