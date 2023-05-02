@@ -1,16 +1,21 @@
 package com.wjl.gmall.order.api;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wjl.gmall.common.result.Result;
 import com.wjl.gmall.common.util.AuthContextHolder;
 import com.wjl.gmall.model.enums.OrderStatus;
+import com.wjl.gmall.model.enums.ProcessStatus;
 import com.wjl.gmall.order.model.entity.OrderDetail;
 import com.wjl.gmall.order.model.entity.OrderInfo;
+import com.wjl.gmall.order.model.vo.OrderWareVO;
+import com.wjl.gmall.order.model.vo.WareSkuVo;
 import com.wjl.gmall.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 
 /*
@@ -78,6 +83,7 @@ public class OrderController {
 
     /**
      * 我的订单
+     *
      * @param request
      * @param page
      * @param limit
@@ -86,28 +92,62 @@ public class OrderController {
     @GetMapping("auth/{page}/{limit}")
     public Result<IPage<OrderInfo>> getOrders(HttpServletRequest request, @PathVariable("page") Long page, @PathVariable("limit") Long limit) {
         String userId = AuthContextHolder.getUserId(request);
-        IPage<OrderInfo> orderInfoIPage = orderService.getOrders(userId,page,limit);
+        IPage<OrderInfo> orderInfoIPage = orderService.getOrders(userId, page, limit);
         return Result.ok(orderInfoIPage);
     }
 
     /**
-     *  订单付款页面信息
+     * 订单付款页面信息
+     *
      * @param orderId
      * @return
      */
     @GetMapping("inner/getOrderInfo/{orderId}")
-    public Result<OrderInfo> getOrderInfo(@PathVariable("orderId") Long orderId,HttpServletRequest request){
+    public Result<OrderInfo> getOrderInfo(@PathVariable("orderId") Long orderId, HttpServletRequest request) {
         OrderInfo orderInfo = orderService.getOrderInfo(orderId);
         return Result.ok(orderInfo);
     }
+
     /**
-     *  订单付款页面信息
+     * 订单付款页面信息
+     *
      * @param orderId
      * @return
      */
     @GetMapping("inner/getOrderInfoUnpaid/{orderId}")
-    public Result<OrderInfo> getOrderUnpaid(@PathVariable("orderId") Long orderId,HttpServletRequest request){
+    public Result<OrderInfo> getOrderUnpaid(@PathVariable("orderId") Long orderId, HttpServletRequest request) {
         OrderInfo orderInfo = orderService.getOrderInfoWithStatus(orderId, OrderStatus.UNPAID);
         return Result.ok(orderInfo);
+    }
+
+
+    /**
+     * 更改订单支付状态
+     *
+     * @param tradeNo
+     * @param orderStatus
+     * @return
+     */
+    @GetMapping("inner/updateOrderUpdate/{orderId}")
+    public Result updateOrderStatus(@PathVariable("orderId") String tradeNo, @RequestParam("status") String orderStatus) {
+        this.orderService.updateOrderProcessStatus(Long.parseLong(tradeNo), ProcessStatus.valueOf(orderStatus));
+        return Result.ok();
+    }
+
+    /**
+     * orderId
+     * [{"wareId":"1","skuIds":["2","10"]},{"wareId":"2","skuIds":["3"]}]
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("orderSplit")
+    public String orderSplit(@RequestParam Map<String, Object> params) {
+        // 订单id
+        String orderId = (String) params.get("orderId");
+        // 仓库id 和 skuId
+        String wareSkuMapJson = (String) params.get("wareSkuMap");
+        List<OrderWareVO> result = this.orderService.orderSplit(orderId, JSON.parseArray(wareSkuMapJson, WareSkuVo.class));
+        return JSON.toJSONString(result);
     }
 }

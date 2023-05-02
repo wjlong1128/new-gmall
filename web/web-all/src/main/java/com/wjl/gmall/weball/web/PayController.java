@@ -26,4 +26,14 @@ public class PayController {
         return "payment/pay";
     }
 
+    /**
+     * 跳转成功界面
+     *
+     * @return
+     */
+    @GetMapping("pay/success.html")
+    public String paySuccess() {
+        return "payment/success";
+    }
+
 }

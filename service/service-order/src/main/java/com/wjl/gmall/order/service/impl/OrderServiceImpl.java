@@ -8,6 +8,7 @@ import com.wjl.gmall.cart.client.CartServiceClient;
 import com.wjl.gmall.cart.model.dto.CartInfo;
 import com.wjl.gmall.common.service.RabbitService;
 import com.wjl.gmall.model.enums.OrderStatus;
+import com.wjl.gmall.model.enums.PaymentType;
 import com.wjl.gmall.model.enums.PaymentWay;
 import com.wjl.gmall.model.enums.ProcessStatus;
 import com.wjl.gmall.order.config.OrderCancelMqConfig;
@@ -15,10 +16,13 @@ import com.wjl.gmall.order.mapper.OrderDetailMapper;
 import com.wjl.gmall.order.mapper.OrderInfoMapper;
 import com.wjl.gmall.order.model.entity.OrderDetail;
 import com.wjl.gmall.order.model.entity.OrderInfo;
+import com.wjl.gmall.order.model.vo.OrderWareVO;
+import com.wjl.gmall.order.model.vo.WareSkuVo;
 import com.wjl.gmall.order.service.OrderService;
 import com.wjl.gmall.product.client.ProductServiceClient;
 import com.wjl.gmall.user.client.UserServiceClient;
 import com.wjl.gmall.user.dto.UserAddress;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,6 +38,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static com.wjl.gmall.common.constants.MqConst.*;
 
 /*
  * @author Wang Jianlong
@@ -262,8 +268,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
     }
 
     @Override
-    public void execExpireOrder(Long orderInfoId) {
+    public void execExpireOrder(Long orderInfoId, String flag, PaymentType type) {
         this.updateOrderProcessStatus(orderInfoId, ProcessStatus.CLOSED);
+        if ("2".equals(flag)) {
+            rabbitService.sendMessage(EXCHANGE_DIRECT_PAYMENT_CLOSE, ROUTING_PAYMENT_CLOSE, orderInfoId+"_"+type.name());
+        }
     }
 
     @Transactional
@@ -305,4 +314,88 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
         info.sumTotalAmount();
         return info;
     }
+
+    /**
+     * 发送订单扣减消息
+     *
+     * @param orderInfo
+     */
+    @Override
+    public void sendOrderStatus(OrderInfo orderInfo) {
+        // 查询订单
+        this.updateOrderProcessStatus(orderInfo.getId(), ProcessStatus.NOTIFIED_WARE);
+        // 封装数据对象
+        String json = this.convertWareJson(orderInfo);
+        // 发送消息
+        rabbitService.sendMessage(EXCHANGE_DIRECT_WARE_STOCK, ROUTING_WARE_STOCK, json);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<OrderWareVO> orderSplit(String orderId, List<WareSkuVo> wareSkuVos) {
+        ArrayList<OrderWareVO> orderWareVOS = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(wareSkuVos)) {
+            Long oId = Long.parseLong(orderId);
+            // 获取父订单对象
+            OrderInfo orderInfo = this.getOrderInfo(oId);
+            List<OrderDetail> orderDetailList = orderInfo.getOrderDetailList();
+            // 拆分子订单
+            Map<Long, OrderInfo> subOrderInfoMap = wareSkuVos.stream().collect(Collectors.toMap(k -> Long.parseLong(k.getWareId()), item -> {
+                List<String> skuIds = item.getSkuIds();
+                // 创建子订单
+                OrderInfo subOrderInfo = new OrderInfo();
+                BeanUtils.copyProperties(orderInfo, subOrderInfo);
+                // 置空id
+                subOrderInfo.setId(null);
+                // 设置父id
+                subOrderInfo.setParentOrderId(oId);
+                // 所属当前仓库的
+                StringBuilder desc = new StringBuilder();
+                ArrayList<OrderDetail> subDetails = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(orderDetailList)) {
+                    orderDetailList.forEach(skuInfo -> {
+                        // 是当前仓库的商品
+                        for (String skuId : skuIds) {
+                            if (skuInfo.getSkuId().toString().equals(skuId)) {
+                                subDetails.add(skuInfo);
+                                desc.append("skuName:").append(skuInfo.getSkuName()).append(" ").append("num:").append(skuInfo.getSkuNum());
+                            }
+                        }
+                    });
+                }
+                subOrderInfo.setOrderDetailList(subDetails);
+                // 计算价格
+                subOrderInfo.sumTotalAmount();
+                // 描述
+                subOrderInfo.setTradeBody(desc.toString());
+                return subOrderInfo;
+            }));
+
+            // 保存子订单
+            this.saveBatch(subOrderInfoMap.values());
+            subOrderInfoMap.values().forEach(item -> {
+                item.getOrderDetailList().forEach(skuInfo -> {
+                    skuInfo.setOrderId(item.getId());
+                    // 批量保存更好 懒
+                    orderDetailMapper.insert(skuInfo);
+                });
+            });
+
+            // 修改父订单状态
+            this.updateOrderProcessStatus(orderInfo.getId(), ProcessStatus.SPLIT);
+
+            subOrderInfoMap.forEach((wareId, subOrderInfo) -> {
+                orderWareVOS.add(new OrderWareVO(subOrderInfo, wareId));
+            });
+        }
+        return orderWareVOS;
+    }
+
+    public String convertWareJson(OrderInfo orderInfo) {
+        orderInfo = this.getOrderInfo(orderInfo.getId());
+        String json = new OrderWareVO(orderInfo, 1L).toJson();
+        return json;
+    }
+
+
 }

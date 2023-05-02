@@ -6,6 +6,7 @@ import com.wjl.gmall.order.model.dto.OrderInfo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -37,10 +38,14 @@ public interface OrderServiceClient {
 
 
     /**
-     *  订单付款页面信息
+     * 订单付款页面信息
+     *
      * @param orderId
      * @return
      */
     @GetMapping("api/order/inner/getOrderInfoUnpaid/{orderId}")
     public Result<OrderInfo> getOrderUnpaid(@PathVariable("orderId") Long orderId);
+
+    @GetMapping("api/order/inner/updateOrderUpdate/{orderId}")
+    Result updateOrderStatus(@PathVariable("orderId") String tradeNo, @RequestParam("status") String orderStatus);
 }

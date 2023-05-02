@@ -1,5 +1,7 @@
 package com.wjl.gmall.order;
 
+import com.wjl.gmall.order.model.entity.OrderInfo;
+import com.wjl.gmall.order.model.vo.OrderWareVO;
 import com.wjl.gmall.order.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,5 +32,11 @@ public class OrderApplicationTest {
     @Test
     void testMaxThread() {
         System.out.println(executor.getMaximumPoolSize());
+    }
+
+    @Test
+    void testtoJson() {
+        OrderInfo orderInfo = this.orderService.getOrderInfo(54L);
+        System.out.println(new OrderWareVO(orderInfo,1L).toJson());
     }
 }

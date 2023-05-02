@@ -3,9 +3,13 @@ package com.wjl.gmall.order.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wjl.gmall.model.enums.OrderStatus;
+import com.wjl.gmall.model.enums.PaymentType;
 import com.wjl.gmall.model.enums.ProcessStatus;
 import com.wjl.gmall.order.model.entity.OrderInfo;
+import com.wjl.gmall.order.model.vo.OrderWareVO;
+import com.wjl.gmall.order.model.vo.WareSkuVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -79,8 +83,9 @@ public interface OrderService extends IService<OrderInfo> {
      * 处理超时订单
      *
      * @param orderInfoId
+     * @param flag        "1" 订单超时不关闭交易记录 "2" 订单超时关闭交易记录
      */
-    void execExpireOrder(Long orderInfoId);
+    void execExpireOrder(Long orderInfoId, String flag, PaymentType paymentType);
 
 
     /**
@@ -100,10 +105,27 @@ public interface OrderService extends IService<OrderInfo> {
     OrderInfo getOrderInfo(Long orderId);
 
     /**
-     *  根据状态获取订单详情
+     * 根据状态获取订单详情
+     *
      * @param orderId
      * @param status
      * @return
      */
     OrderInfo getOrderInfoWithStatus(Long orderId, OrderStatus status);
+
+    /**
+     * 发送消息扣减库存
+     *
+     * @param
+     */
+    void sendOrderStatus(OrderInfo orderInfo);
+
+    /**
+     * 根据订单id 和sku对应的商品所在的仓库id拆单
+     *
+     * @param orderId
+     * @param wareSkuVo
+     * @return
+     */
+    List<OrderWareVO> orderSplit(String orderId, List<WareSkuVo> wareSkuVo);
 }

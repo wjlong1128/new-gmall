@@ -1,6 +1,7 @@
 package com.wjl.gmall.order.receiver;
 
 import com.rabbitmq.client.Channel;
+import com.wjl.gmall.model.enums.PaymentType;
 import com.wjl.gmall.order.config.OrderCancelMqConfig;
 import com.wjl.gmall.order.model.entity.OrderInfo;
 import com.wjl.gmall.order.service.OrderService;
@@ -52,7 +53,18 @@ public class OrderCancelReceiver {
         if (unpaid.equals(processStatus) && "UNPAID".equals(orderStatus)) {
             // 调用接口关闭订单
             try {
-                orderService.execExpireOrder(orderInfoId);
+                // 问题，如果用户在刚好超时的情况下付款了，那么怎么判断到底有没有支付呢？
+
+                //1. 再次 调用远程，查看是否有交易信息
+
+                // 1.1 有 ？ 再次查询支付宝交易记录
+
+                // 1.1.1 有？ 支付宝 交易记录 订单
+                // 1.1.2 没有 关闭订单支付记录
+
+                // 1.2 没有 ？ 只关闭订单
+
+                orderService.execExpireOrder(orderInfoId, "2", PaymentType.ALIPAY);
             } catch (Exception e) {
                 channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
                 throw new RuntimeException(e);

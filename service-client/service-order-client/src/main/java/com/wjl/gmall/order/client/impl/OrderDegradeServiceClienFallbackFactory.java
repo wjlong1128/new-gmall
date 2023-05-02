@@ -28,6 +28,16 @@ public class OrderDegradeServiceClienFallbackFactory implements FallbackFactory<
             public Result<OrderInfo> getOrderInfo(Long orderId) {
                 return Result.fail();
             }
+
+            @Override
+            public Result<OrderInfo> getOrderUnpaid(Long orderId) {
+                return Result.fail();
+            }
+
+            @Override
+            public Result updateOrderStatus(String tradeNo, String orderStatus) {
+                return Result.fail();
+            }
         };
     }
 }
