@@ -15,8 +15,21 @@ import java.util.Optional;
  * @description
  */
 public interface PaymentService extends IService<PaymentInfo> {
+    /**
+     * 保存未支付的记录信息
+     *
+     * @param orderUnpaid
+     * @param paymentType
+     */
     void saveUnpaidPaymentInfo(OrderInfo orderUnpaid, PaymentType paymentType);
 
+    /**
+     * 根据商家订单号获取记录
+     *
+     * @param outTradeNo
+     * @param alipay
+     * @return
+     */
     Optional<PaymentInfo> getPaymentInfoWithOutTradeNo(String outTradeNo, PaymentType alipay);
 
     /**
@@ -30,9 +43,35 @@ public interface PaymentService extends IService<PaymentInfo> {
     void updatePaymentInfo(String outTradeNo, PaymentType type, String orderId, PaymentStatus status);
 
     /**
-     *  根据订单id和支付类型关闭交易记录
+     * 根据订单id和支付类型关闭交易记录
+     *
      * @param orderId
      * @param type
      */
     void closePayment(Long orderId, PaymentType type);
+
+    /**
+     * 根据订单id查询交易记录
+     *
+     * @param orderId
+     * @return
+     */
+    Optional<PaymentInfo> getPaymentInfoWithOrderId(Long orderId);
+
+    /**
+     * 获取支付记录 无论支付方式
+     *
+     * @param orderId
+     * @return
+     */
+    PaymentInfo getPaymentInfo(Long orderId);
+
+    /**
+     * 获取支付记录
+     *
+     * @param orderId
+     * @param valueOf
+     * @return
+     */
+    PaymentInfo getPaymentInfo(Long orderId, PaymentType valueOf);
 }

@@ -1,11 +1,16 @@
 package com.wjl.gmall.pay.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.internal.util.WebUtils;
+import com.alipay.api.request.AlipayTradeCloseRequest;
 import com.alipay.api.request.AlipayTradePagePayRequest;
+import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.request.AlipayTradeRefundRequest;
+import com.alipay.api.response.AlipayTradeCloseResponse;
+import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.wjl.gmall.model.enums.OrderStatus;
 import com.wjl.gmall.model.enums.PaymentStatus;
@@ -177,5 +182,66 @@ public class AliPayServiceImpl implements AliPayService {
         } catch (AlipayApiException e) {
             throw new RuntimeException("退款失败！", e);
         }
+    }
+
+    /**
+     * 查询支付宝交易记录
+     *
+     * @param orderId
+     * @return
+     */
+    @Override
+    public boolean checkPayment(Long orderId) {
+        OrderInfo orderInfo = orderServiceClient.getOrderInfo(orderId).getData();
+        if (orderInfo == null) {
+            return false;
+        }
+        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", orderInfo.getOutTradeNo());
+        request.setBizContent(bizContent.toString());
+        try {
+            WebUtils.setNeedCheckServerTrusted(false);
+            AlipayTradeQueryResponse response = alipayClient.execute(request);
+            if (response.isSuccess()) {
+                return true;
+            } else {
+                System.out.println("调用失败");
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * 支付宝关闭交易记录
+     *
+     * @param orderId
+     * @return
+     */
+    @Override
+    public boolean closePay(Long orderId) {
+        OrderInfo orderInfo = orderServiceClient.getOrderInfo(orderId).getData();
+        if (orderInfo == null) {
+            return false;
+        }
+        AlipayTradeCloseRequest request = new AlipayTradeCloseRequest();
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", orderInfo.getOutTradeNo());
+        request.setBizContent(bizContent.toString());
+        WebUtils.setNeedCheckServerTrusted(false);
+        try {
+            AlipayTradeCloseResponse response = alipayClient.execute(request);
+            if (response.isSuccess()) {
+                return true;
+            } else {
+
+                return false;
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

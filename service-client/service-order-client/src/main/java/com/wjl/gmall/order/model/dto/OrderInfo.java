@@ -1,8 +1,6 @@
 package com.wjl.gmall.order.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.wjl.gmall.model.activity.ActivityRule;
-import com.wjl.gmall.model.activity.CouponInfo;
 import com.wjl.gmall.model.base.BaseEntity;
 import com.wjl.gmall.model.enums.ActivityType;
 import com.wjl.gmall.model.enums.CouponType;

@@ -117,4 +117,29 @@ public class PaymentServiceimpl extends ServiceImpl<PaymentInfoMapper, PaymentIn
         ;
         this.update(entity, updateWrapper);
     }
+
+    @Override
+    public Optional<PaymentInfo> getPaymentInfoWithOrderId(Long orderId) {
+        LambdaQueryWrapper<PaymentInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(PaymentInfo::getOrderId, orderId);
+        PaymentInfo info = this.getOne(queryWrapper);
+        return Optional.ofNullable(info);
+    }
+
+    @Override
+    public PaymentInfo getPaymentInfo(Long orderId) {
+        Optional<PaymentInfo> paymentInfoWithOrderId = this.getPaymentInfoWithOrderId(orderId);
+        if (paymentInfoWithOrderId.isPresent()) {
+            return paymentInfoWithOrderId.get();
+        }
+        return null;
+    }
+
+    @Override
+    public PaymentInfo getPaymentInfo(Long orderId, PaymentType type) {
+        LambdaQueryWrapper<PaymentInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(PaymentInfo::getOrderId, orderId);
+        queryWrapper.eq(PaymentInfo::getPaymentType, type.name());
+        return this.getOne(queryWrapper);
+    }
 }

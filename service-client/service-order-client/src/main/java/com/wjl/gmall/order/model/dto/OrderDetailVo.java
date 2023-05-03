@@ -1,6 +1,5 @@
 package com.wjl.gmall.order.model.dto;
 
-import com.wjl.gmall.model.activity.ActivityRule;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
