@@ -25,6 +25,11 @@ public class BusinessException extends RuntimeException {
         this.code = code;
     }
 
+    public BusinessException(String message) {
+        super(message);
+        this.code = ResultCodeEnum.FAIL.getCode();
+    }
+
     /**
      * 接收枚举类型对象
      * @param resultCodeEnum

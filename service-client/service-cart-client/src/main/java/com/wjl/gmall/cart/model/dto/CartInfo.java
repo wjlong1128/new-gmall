@@ -1,6 +1,5 @@
 package com.wjl.gmall.cart.model.dto;
 
-import com.wjl.gmall.model.activity.CouponInfo;
 import com.wjl.gmall.model.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

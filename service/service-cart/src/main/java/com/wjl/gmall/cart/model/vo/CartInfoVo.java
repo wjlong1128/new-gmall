@@ -1,7 +1,7 @@
 package com.wjl.gmall.cart.model.vo;
 
+import com.wjl.gmall.cart.model.dto.ActivityRule;
 import com.wjl.gmall.cart.model.entity.CartInfo;
-import com.wjl.gmall.model.activity.ActivityRule;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

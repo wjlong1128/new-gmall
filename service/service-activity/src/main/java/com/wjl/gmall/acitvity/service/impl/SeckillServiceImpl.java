@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.wjl.gmall.acitvity.model.entity.OrderRecode;
 import com.wjl.gmall.acitvity.model.entity.SeckillGoods;
 import com.wjl.gmall.acitvity.model.entity.UserRecode;
+import com.wjl.gmall.acitvity.model.vo.SeckillStatus;
+import com.wjl.gmall.acitvity.model.vo.SeckillTradeVo;
+import com.wjl.gmall.acitvity.model.vo.SubmitOrderVo;
 import com.wjl.gmall.acitvity.redis.RedisChannelConfig;
 import com.wjl.gmall.acitvity.repository.SeckillRepository;
 import com.wjl.gmall.acitvity.service.SeckillService;
@@ -11,9 +14,15 @@ import com.wjl.gmall.acitvity.util.CacheHelper;
 import com.wjl.gmall.common.constant.RedisConst;
 import com.wjl.gmall.common.constants.MqConst;
 import com.wjl.gmall.common.execption.BusinessException;
+import com.wjl.gmall.common.result.Result;
 import com.wjl.gmall.common.result.ResultCodeEnum;
 import com.wjl.gmall.common.service.RabbitService;
 import com.wjl.gmall.common.util.MD5;
+import com.wjl.gmall.order.client.OrderServiceClient;
+import com.wjl.gmall.order.model.dto.OrderDetail;
+import com.wjl.gmall.order.model.dto.OrderInfo;
+import com.wjl.gmall.user.client.UserServiceClient;
+import com.wjl.gmall.user.dto.UserAddress;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +33,8 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -47,6 +58,16 @@ public class SeckillServiceImpl implements SeckillService {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private UserServiceClient userServiceClient;
+
+    @Autowired
+    private ThreadPoolExecutor executor;
+
+
+    @Autowired
+    private OrderServiceClient orderServiceClient;
 
     /**
      * 获取需要预热的商品
@@ -182,19 +203,21 @@ public class SeckillServiceImpl implements SeckillService {
         if ("0".equals(status) || StringUtils.isEmpty(status)) {
             return;
         }
-        // 校验是否下过单
-        Boolean exists = this.stringRedisTemplate.opsForValue().setIfAbsent(RedisConst.SECKILL_USER + userId, skuId.toString());
+        // 校验是否下过单 并设置用户记录
+        String userOrderKey = getUserOrderKey(userId);
+        Boolean exists = this.stringRedisTemplate.opsForValue().setIfAbsent(userOrderKey, skuId.toString());
         if (!Boolean.TRUE.equals(exists)) {
             return;
         }
         // 校验库存
-        String stockValue = this.stringRedisTemplate.opsForList().rightPop(RedisConst.SECKILL_STOCK_PREFIX + skuId);
+        String seckillStockKey = getSeckillStockKey(skuId);
+        String stockValue = this.stringRedisTemplate.opsForList().rightPop(seckillStockKey);
         if (StringUtils.isEmpty(stockValue)) {
-            // 标记没有了
+            // 标记商品没有了
             this.stringRedisTemplate.convertAndSend(RedisChannelConfig.SECKILL_PUBLISH, skuId + ":0");
             return;
         }
-        // 生成订单信息、
+        // 生成订单信息
         OrderRecode orderRecode = new OrderRecode();
         orderRecode.setUserId(userId);
         String json = (String) this.stringRedisTemplate.opsForHash().get(RedisConst.SECKILL_GOODS, skuId.toString());
@@ -208,15 +231,32 @@ public class SeckillServiceImpl implements SeckillService {
         this.updateStockCount(skuId);
     }
 
+    private static String getSeckillStockKey(Long skuId) {
+        return RedisConst.SECKILL_STOCK_PREFIX + skuId;
+    }
+
+
+    /**
+     * 获取用户已经下单key
+     *
+     * @param userId
+     * @return
+     */
+    private static String getUserOrderKey(String userId) {
+        return RedisConst.SECKILL_USER + userId;
+    }
+
     @Override
     public void updateStockCount(Long skuId) {
         RLock lock = redissonClient.getLock("seckill:lock:" + skuId);
         lock.lock();
         try {
             // 获取最新数量
-            Long stockSize = this.stringRedisTemplate.boundListOps(RedisConst.SECKILL_STOCK_PREFIX + skuId).size();
-            // 更新数据库
-            this.seckillRepository.updateSeckillGoodsStock(skuId, stockSize.intValue());
+            Long stockSize = this.stringRedisTemplate.boundListOps(getSeckillStockKey(skuId)).size();
+            if (stockSize.intValue() == 0) {
+                // 更新数据库
+                this.seckillRepository.updateSeckillGoodsStock(skuId, stockSize.intValue());
+            }
             // 更新redis
             String json = (String) this.stringRedisTemplate.opsForHash().get(RedisConst.SECKILL_GOODS, skuId.toString());
             SeckillGoods seckillGoods = JSON.parseObject(json, SeckillGoods.class);
@@ -227,8 +267,170 @@ public class SeckillServiceImpl implements SeckillService {
         }
     }
 
+    @Override
+    public SeckillStatus checkOrder(Long skuId, String userId) {
+        SeckillStatus seckillStatus = new SeckillStatus();
+        String userHistoryKey = RedisConst.SECKILL_USER + userId;
+        String skuStr = this.stringRedisTemplate.opsForValue().get(userHistoryKey);
+        // 判断是否下过秒杀单
+        if (StringUtils.isEmpty(skuStr) || !skuStr.equals(skuId.toString())) {
+            // 没有下过单的理由 1. 状态位没了-> 秒杀结束  2.有 -> 还是在排队中
+            String status = (String) CacheHelper.get(skuStr.toString());
+            if ("0".equals(status)) {
+                seckillStatus.setStatus(ResultCodeEnum.SECKILL_FINISH);
+                return seckillStatus;
+            }
+        }
+        // 获取临时订单
+        String orderUserKey = getOrderUserKey(skuId);
+        BoundHashOperations<String, String, String> seckillOrderSkuBound =
+                this.stringRedisTemplate.boundHashOps(orderUserKey);
+        Boolean isExists = seckillOrderSkuBound.hasKey(userId);
+        if (Boolean.TRUE.equals(isExists)) {
+            // 说明用户未支付 但是下单了 抢单成功
+            seckillStatus.setStatus(ResultCodeEnum.SECKILL_SUCCESS);
+            String json = seckillOrderSkuBound.get(userId);
+            OrderRecode orderRecode = JSON.parseObject(json, OrderRecode.class);
+            seckillStatus.setData(orderRecode);
+            return seckillStatus;
+        }
+        // 没有 可能支付了 看看支付订单有没有
+        BoundHashOperations<String, String, String> skuOrderUser =
+                this.stringRedisTemplate.boundHashOps(RedisConst.SECKILL_ORDERS_USERS + skuId);
+        isExists = skuOrderUser.hasKey(userId);
+        if (Boolean.TRUE.equals(isExists)) {
+            // 支付了
+            seckillStatus.setStatus(ResultCodeEnum.SECKILL_ORDER_SUCCESS);
+            // 返回订单id
+            String orderId = skuOrderUser.get(userId);
+            seckillStatus.setData(orderId);
+            return seckillStatus;
+        }
+        // 没有 在排队
+        seckillStatus.setStatus(ResultCodeEnum.SECKILL_RUN);
+        return seckillStatus;
+    }
+
+    /**
+     * 获取抢单成功的的用户的key
+     *
+     * @param skuId
+     * @return
+     */
+    private static String getOrderUserKey(Long skuId) {
+        return RedisConst.SECKILL_ORDERS + skuId;
+    }
+
+    /**
+     * 获取秒杀下单页信息
+     *
+     * @param skuId
+     * @param userId
+     * @return
+     */
+    @Override
+    public SeckillTradeVo getTradeData(String skuId, String userId) {
+        SeckillTradeVo seckillTradeVo = new SeckillTradeVo();
+        CompletableFuture<Void> orderDetailFuture = CompletableFuture.runAsync(() -> {
+            // 获取送货清单
+            BoundHashOperations<String, String, String> boundSeckillOrders = this.stringRedisTemplate.boundHashOps(RedisConst.SECKILL_ORDERS + skuId);
+            String json = boundSeckillOrders.get(userId);
+            if (StringUtils.isEmpty(json)) {
+                throw new BusinessException(ResultCodeEnum.ILLEGAL_REQUEST);
+            }
+            OrderRecode orderRecode = JSON.parseObject(json, OrderRecode.class);
+
+            // 获取秒杀商品
+            SeckillGoods seckillGoods = orderRecode.getSeckillGoods();
+            List<OrderDetail> orderDetailList = new ArrayList<>();
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setSkuId(seckillGoods.getSkuId());
+            orderDetail.setSkuName(seckillGoods.getSkuName());
+            orderDetail.setImgUrl(seckillGoods.getSkuDefaultImg());
+            // 下单价格为秒杀价格
+            orderDetail.setOrderPrice(seckillGoods.getCostPrice());
+            orderDetail.setSkuNum(orderRecode.getNum());
+            orderDetailList.add(orderDetail);
+
+            // 计算总金额
+            OrderInfo orderInfo = new OrderInfo();
+            orderInfo.setOrderDetailList(orderDetailList);
+            orderInfo.sumTotalAmount();
+
+            seckillTradeVo.setTotalNum(orderRecode.getNum());
+            seckillTradeVo.setTotalAmount(orderInfo.getTotalAmount());
+            seckillTradeVo.setDetailArrayList(orderDetailList);
+
+        }, executor);
+
+        CompletableFuture<Void> addressListFuture = CompletableFuture.runAsync(() -> {
+            // 获取用户地址
+            List<UserAddress> userAddressListByUserId = this.userServiceClient.findUserAddressListByUserId(Long.parseLong(userId));
+            seckillTradeVo.setUserAddressList(userAddressListByUserId);
+        }, executor);
+        CompletableFuture.allOf(addressListFuture, orderDetailFuture).join();
+        return seckillTradeVo;
+    }
+
+    /**
+     * 提交订单信息
+     *
+     * @param userId
+     * @param submitOrderVo
+     * @return
+     */
+    @Override
+    public Long submitOrder(String userId, SubmitOrderVo submitOrderVo) {
+        OrderInfo order = submitOrderVo.getOrder();
+        order.setUserId(Long.parseLong(userId));
+        // 获取流水号
+        String tradeNo = this.orderServiceClient.getTradeNo().getData();
+        // 提交订单
+        Result<Long> orderSubmit = this.orderServiceClient.submitOrder(order, tradeNo, true);
+        if (!orderSubmit.isOk()) {
+            throw new BusinessException("下单失败");
+        }
+        Long orderInfoId = orderSubmit.getData();
+        Long skuId = submitOrderVo.getSkuId();
+        // 处理临时订单
+        BoundHashOperations<String, String, String> tempOrder = this.stringRedisTemplate.boundHashOps(getOrderUserKey(skuId));
+        tempOrder.delete(userId);
+        // 添加用户订单记录
+
+        BoundHashOperations<String, String, String> seckillOrder = this.stringRedisTemplate.boundHashOps(getOrderInfoSeckillKey(skuId));
+        seckillOrder.put(userId, orderInfoId.toString());
+        return orderInfoId;
+    }
+
+    @Override
+    public void clearOverDueSeckill() {
+        List<Long> ids = this.seckillRepository.getOverDueSeckillSkuIds();
+        ids.forEach(skuId->{
+            // 删除对应的商品
+            this.stringRedisTemplate.boundHashOps(RedisConst.SECKILL_GOODS).delete(skuId.toString());
+            // 删除库存
+            this.stringRedisTemplate.delete(RedisConst.SECKILL_STOCK_PREFIX + skuId);
+            // 删除预下单
+            this.stringRedisTemplate.delete(RedisConst.SECKILL_USER + skuId);
+            // 删除下单
+            this.stringRedisTemplate.delete(RedisConst.SECKILL_ORDERS_USERS + skuId);
+        });
+    }
+
+    /**
+     * 获取已经提交订单的用户的key
+     *
+     * @param skuId
+     * @return
+     */
+    private static String getOrderInfoSeckillKey(Long skuId) {
+        return RedisConst.SECKILL_ORDERS_USERS + skuId;
+    }
+
+
     private static String getRandomCodeKey(Long skuId, String userId) {
         return "user:" + userId + ":seckill:" + skuId + ":code";
     }
+
 
 }

@@ -66,4 +66,16 @@ public class SeckillRecever {
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 
+
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    value = @Queue(name = MqConst.QUEUE_TASK_18),
+                    exchange = @Exchange(name = MqConst.EXCHANGE_DIRECT_TASK),
+                    key = MqConst.ROUTING_TASK_18
+            )
+    )
+    public void clearSeckill(Message message, Channel channel) throws IOException {
+this.seckillService.clearOverDueSeckill();
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+    }
 }

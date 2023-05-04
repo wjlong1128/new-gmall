@@ -4,9 +4,7 @@ import com.wjl.gmall.common.result.Result;
 import com.wjl.gmall.order.client.impl.OrderDegradeServiceClienFallbackFactory;
 import com.wjl.gmall.order.model.dto.OrderInfo;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -48,4 +46,27 @@ public interface OrderServiceClient {
 
     @GetMapping("api/order/inner/updateOrderUpdate/{orderId}")
     Result updateOrderStatus(@PathVariable("orderId") String tradeNo, @RequestParam("status") String orderStatus);
+
+
+    /**
+     * 获取流水号
+     *
+     * @return
+     */
+    @GetMapping("api/order/inner/tradeNo")
+    public Result<String> getTradeNo();
+
+
+    /**
+     * 提交订单 返回订单id
+     * 验证价格是否变更，变更则将变更的数据发送给cart服务更新购物扯数据
+     * 调用库存服务查看库存是否足够
+     *
+     * @param orderInfo
+     * @param tradeNo   防止重复提交的流水号
+     * @return 返回订单号
+     */
+    @PostMapping("api/order/auth/submitOrder")
+    public Result<Long> submitOrder(@RequestBody OrderInfo orderInfo, @RequestParam("tradeNo") String tradeNo, @RequestParam(value = "isActivity", required = false, defaultValue = "false") Boolean isActivity);
+
 }

@@ -28,7 +28,7 @@ public interface OrderService extends IService<OrderInfo> {
      * @param userId
      * @return
      */
-    Long submitOrder(OrderInfo orderInfo, String userId);
+    Long submitOrder(OrderInfo orderInfo, String userId,boolean isActivity);
 
     /**
      * 根据用户生成相关的流水号
@@ -128,4 +128,6 @@ public interface OrderService extends IService<OrderInfo> {
      * @return
      */
     List<OrderWareVO> orderSplit(String orderId, List<WareSkuVo> wareSkuVo);
+
+    Long submitOrder(OrderInfo orderInfo, String tradeNo, String userId,boolean isActivity);
 }

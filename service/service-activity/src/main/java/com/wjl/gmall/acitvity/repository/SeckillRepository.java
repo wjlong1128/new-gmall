@@ -26,4 +26,6 @@ public interface SeckillRepository {
      * @param stockSize
      */
     void updateSeckillGoodsStock(Long skuId, Integer stockSize);
+
+    List<Long> getOverDueSeckillSkuIds();
 }

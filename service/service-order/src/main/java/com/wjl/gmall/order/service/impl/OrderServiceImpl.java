@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wjl.gmall.cart.client.CartServiceClient;
 import com.wjl.gmall.cart.model.dto.CartInfo;
+import com.wjl.gmall.common.execption.BusinessException;
 import com.wjl.gmall.common.service.RabbitService;
 import com.wjl.gmall.model.enums.OrderStatus;
 import com.wjl.gmall.model.enums.PaymentType;
@@ -147,7 +148,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Long submitOrder(OrderInfo orderInfo, String userId) {
+    public Long submitOrder(OrderInfo orderInfo, String userId, boolean isActivity) {
         // 用户id
         orderInfo.setUserId(Long.parseLong(userId));
         // 收货人
@@ -166,8 +167,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
             tradeBody.append("skuName:").append(item.getSkuName())
                     .append(" num:").append(item.getSkuNum())
                     .append(",");
-            // 获取最新的价格 优化，整一个list skuId过去 返回一个map<skuId,Price>
-            item.setOrderPrice(productServiceClient.getSkuPrice(item.getSkuId()).getData());
+            if (!isActivity) {
+                // 获取最新的价格 优化，整一个list skuId过去 返回一个map<skuId,Price>
+                item.setOrderPrice(productServiceClient.getSkuPrice(item.getSkuId()).getData());
+            }
         });
         orderInfo.sumTotalAmount();// 计算价格
         String tradeBodyString = tradeBody.toString().length() > 100 ? tradeBody.toString().substring(0, 100) : tradeBody.toString();
@@ -271,7 +274,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
     public void execExpireOrder(Long orderInfoId, String flag, PaymentType type) {
         this.updateOrderProcessStatus(orderInfoId, ProcessStatus.CLOSED);
         if ("2".equals(flag)) {
-            rabbitService.sendMessage(EXCHANGE_DIRECT_PAYMENT_CLOSE, ROUTING_PAYMENT_CLOSE, orderInfoId+"_"+type.name());
+            rabbitService.sendMessage(EXCHANGE_DIRECT_PAYMENT_CLOSE, ROUTING_PAYMENT_CLOSE, orderInfoId + "_" + type.name());
         }
     }
 
@@ -391,10 +394,39 @@ public class OrderServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> im
         return orderWareVOS;
     }
 
+    @Override
+    public Long submitOrder(OrderInfo orderInfo, String tradeNo, String userId, boolean isActivity) {
+        // 验证流水号
+        if (!this.checkTradeNoCode(userId, tradeNo)) {
+            throw new BusinessException("不能重复提交订单!");
+        }
+        // 验证价格是否变动 不是优惠就验证价格
+        if (!isActivity) {
+            // 验证库存
+            boolean flag = true;
+            for (OrderDetail item : orderInfo.getOrderDetailList()) {
+                flag = this.checkStock(item.getSkuId().toString(), item.getSkuNum().toString());
+                if (!flag) {
+                    throw new BusinessException(item.getSkuName() + "库存不足");
+                }
+            }
+            boolean checked = this.checkedPrice(orderInfo, userId);
+            if (checked) {
+                throw new BusinessException("价格变更!!!");
+            }
+        } else {
+            // TODO: 验证优惠价格
+        }
+
+        Long orderId = this.submitOrder(orderInfo, userId, isActivity);
+        // 删除流水号
+        this.deleteTradeNoCode(userId);
+        return orderId;
+    }
+
     public String convertWareJson(OrderInfo orderInfo) {
         orderInfo = this.getOrderInfo(orderInfo.getId());
-        String json = new OrderWareVO(orderInfo, 1L).toJson();
-        return json;
+        return new OrderWareVO(orderInfo, 1L).toJson();
     }
 
 

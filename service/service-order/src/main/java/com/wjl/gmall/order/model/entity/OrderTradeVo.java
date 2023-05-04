@@ -1,6 +1,5 @@
 package com.wjl.gmall.order.model.entity;
 
-import com.wjl.gmall.model.activity.CouponInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

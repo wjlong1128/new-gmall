@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author wangjianlong
@@ -39,16 +40,24 @@ public class DefaultSeckillRepository implements SeckillRepository {
     }
 
     @Override
-    public void updateSeckillGoodsStock(Long skuId,  Integer stockSize) {
+    public void updateSeckillGoodsStock(Long skuId, Integer stockSize) {
         LambdaQueryWrapper<SeckillGoods> updateWrapper = new LambdaQueryWrapper<>();
-        updateWrapper.eq(SeckillGoods::getSkuId,skuId);
+        updateWrapper.eq(SeckillGoods::getSkuId, skuId);
         SeckillGoods entity = new SeckillGoods();
         entity.setStockCount(stockSize.intValue());
         entity.setSkuId(skuId);
         int update = this.seckillMapper.update(entity, updateWrapper);
-        if (update <= 0){
+        if (update <= 0) {
             throw new RuntimeException("更新库存失败");
         }
+    }
+
+    @Override
+    public List<Long> getOverDueSeckillSkuIds() {
+        LambdaQueryWrapper<SeckillGoods> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(SeckillGoods::getSkuId);
+        queryWrapper.lt(SeckillGoods::getEndTime, LocalDateTime.now());
+        return this.seckillMapper.selectList(queryWrapper).stream().map(SeckillGoods::getId).collect(Collectors.toList());
     }
 
     /**

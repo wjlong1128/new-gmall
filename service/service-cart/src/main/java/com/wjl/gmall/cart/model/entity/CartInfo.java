@@ -1,9 +1,9 @@
 package com.wjl.gmall.cart.model.entity;
 
-import com.wjl.gmall.model.activity.CouponInfo;
-import com.wjl.gmall.model.base.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.wjl.gmall.cart.model.dto.CouponInfo;
+import com.wjl.gmall.model.base.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

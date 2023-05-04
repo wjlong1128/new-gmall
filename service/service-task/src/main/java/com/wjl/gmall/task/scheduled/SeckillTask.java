@@ -25,7 +25,7 @@ public class SeckillTask {
     /**
      * 定时发送消息提醒上架秒杀商品
      */
-    @Scheduled(cron = "0/3 * * * * ?")
+    @Scheduled(cron = "0/5 * * * * ?")
     public void seckillSku() {
         rabbitService.sendMessage(MqConst.EXCHANGE_DIRECT_TASK, MqConst.ROUTING_TASK_1, 1L);
     }
@@ -39,5 +39,8 @@ public class SeckillTask {
     //    System.out.println("执行");
     //}
 
-
+    @Scheduled(cron = "0/60 * * * * ?")
+    public void clearSeckillSku() {
+        rabbitService.sendMessage(MqConst.EXCHANGE_DIRECT_TASK, MqConst.ROUTING_TASK_18, 1L);
+    }
 }

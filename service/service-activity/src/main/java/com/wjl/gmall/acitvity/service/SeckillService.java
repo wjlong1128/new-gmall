@@ -1,6 +1,9 @@
 package com.wjl.gmall.acitvity.service;
 
 import com.wjl.gmall.acitvity.model.entity.SeckillGoods;
+import com.wjl.gmall.acitvity.model.vo.SeckillStatus;
+import com.wjl.gmall.acitvity.model.vo.SeckillTradeVo;
+import com.wjl.gmall.acitvity.model.vo.SubmitOrderVo;
 
 import java.util.List;
 
@@ -59,4 +62,31 @@ public interface SeckillService {
      * @param skuId
      */
     void updateStockCount(Long skuId);
+
+    /**
+     *  查询秒杀状态
+     * @param skuId
+     * @param userId
+     * @return
+     */
+    SeckillStatus checkOrder(Long skuId, String userId);
+
+    /**
+     *  获取秒杀下单页信息
+     * @return
+     */
+    SeckillTradeVo getTradeData(String skuId, String userId);
+
+    /**
+     *  提交秒杀订单
+     * @param userId
+     * @param submitOrderVo
+     * @return
+     */
+    Long submitOrder(String userId, SubmitOrderVo submitOrderVo);
+
+    /**
+     *  清除过期的秒杀
+     */
+    void clearOverDueSeckill();
 }

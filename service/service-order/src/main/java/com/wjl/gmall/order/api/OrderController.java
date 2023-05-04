@@ -6,7 +6,6 @@ import com.wjl.gmall.common.result.Result;
 import com.wjl.gmall.common.util.AuthContextHolder;
 import com.wjl.gmall.model.enums.OrderStatus;
 import com.wjl.gmall.model.enums.ProcessStatus;
-import com.wjl.gmall.order.model.entity.OrderDetail;
 import com.wjl.gmall.order.model.entity.OrderInfo;
 import com.wjl.gmall.order.model.vo.OrderWareVO;
 import com.wjl.gmall.order.model.vo.WareSkuVo;
@@ -33,7 +32,7 @@ public class OrderController {
     private OrderService orderService;
 
     /**
-     * 获取交易信息
+     * 获取交易信息 包括流水号
      *
      * @param request
      * @return
@@ -46,6 +45,19 @@ public class OrderController {
         return Result.ok(result);
     }
 
+    /**
+     * 获取流水号
+     *
+     * @param request
+     * @return
+     */
+    @GetMapping("inner/tradeNo")
+    public Result<String> getTradeNo(HttpServletRequest request) {
+        String userId = AuthContextHolder.getUserId(request);
+        String tradeNoCode = this.orderService.getTradeNoCode(userId);
+        return Result.ok(tradeNoCode);
+    }
+
 
     /**
      * 提交订单 返回订单id
@@ -55,29 +67,17 @@ public class OrderController {
      * @param orderInfo
      * @param request
      * @param tradeNo   防止重复提交的流水号
-     * @return
+     * @return 返回订单号
      */
     @PostMapping("auth/submitOrder")
-    public Result submitOrder(@RequestBody OrderInfo orderInfo, @RequestParam("tradeNo") String tradeNo, HttpServletRequest request) {
+    public Result<Long> submitOrder(
+            @RequestBody OrderInfo orderInfo,
+            @RequestParam("tradeNo") String tradeNo,
+            @RequestParam(value = "isActivity", defaultValue = "false", required = false) Boolean isActivity,
+            HttpServletRequest request
+    ) {
         String userId = AuthContextHolder.getUserId(request);
-        if (!orderService.checkTradeNoCode(userId, tradeNo)) {
-            return Result.fail().message("不能重复提交订单!");
-        }
-        boolean flag = true;
-        for (OrderDetail item : orderInfo.getOrderDetailList()) {
-            flag = orderService.checkStock(item.getSkuId().toString(), item.getSkuNum().toString());
-            if (!flag) {
-                return Result.fail().message(item.getSkuName() + "库存不足");
-            }
-        }
-        // 验证价格是否变动
-        boolean checked = orderService.checkedPrice(orderInfo, userId);
-        if (checked) {
-            return Result.fail().message("价格变更!!!");
-        }
-        Long orderId = orderService.submitOrder(orderInfo, userId);
-        // 删除流水号
-        orderService.deleteTradeNoCode(userId);
+        Long orderId = this.orderService.submitOrder(orderInfo, tradeNo, userId, Boolean.TRUE.equals(isActivity));
         return Result.ok(orderId);
     }
 

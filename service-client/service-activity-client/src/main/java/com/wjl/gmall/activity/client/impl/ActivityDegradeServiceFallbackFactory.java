@@ -7,6 +7,7 @@ import feign.hystrix.FallbackFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wangjianlong
@@ -26,6 +27,11 @@ public class ActivityDegradeServiceFallbackFactory implements FallbackFactory<Ac
 
             @Override
             public Result<SeckillGoods> findBySkuId(Long skuId) {
+                return Result.fail();
+            }
+
+            @Override
+            public Result<Map<String, Object>> trade(String skuId) {
                 return Result.fail();
             }
         };

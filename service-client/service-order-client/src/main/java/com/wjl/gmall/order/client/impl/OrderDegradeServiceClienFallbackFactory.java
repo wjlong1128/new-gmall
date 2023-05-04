@@ -38,6 +38,17 @@ public class OrderDegradeServiceClienFallbackFactory implements FallbackFactory<
             public Result updateOrderStatus(String tradeNo, String orderStatus) {
                 return Result.fail();
             }
+
+            @Override
+            public Result<String> getTradeNo() {
+                return Result.fail();
+            }
+
+            @Override
+            public Result<Long> submitOrder(OrderInfo orderInfo, String tradeNo, Boolean isActivity) {
+                return Result.fail();
+            }
+
         };
     }
 }

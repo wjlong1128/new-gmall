@@ -3,7 +3,7 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${my-server.addr}:3306/gmall-product
+    url: jdbc:mysql://localhost:3306/gmall-product
     username: root
     password: root
     hikari:
@@ -15,7 +15,7 @@ spring:
       minimum-idle: 10 #最小空闲连接数量
       pool-name: SPHHikariPool # 连接池名称
   zipkin:
-    base-url: http://${my-server.addr}:9411
+  # base-url: http://${my-server.addr}:9411
 
 
 

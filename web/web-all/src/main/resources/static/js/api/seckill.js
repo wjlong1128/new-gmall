@@ -43,11 +43,11 @@ var seckill = {
     },
 
     // 提交订单
-    submitOrder(order) {
+    submitOrder(data) {
         return request({
             url: this.api_name + '/auth/submitOrder',
             method: 'post',
-            data: order
+            data
         })
     },
 }

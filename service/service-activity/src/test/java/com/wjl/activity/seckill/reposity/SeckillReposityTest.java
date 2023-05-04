@@ -26,4 +26,11 @@ public class SeckillReposityTest {
         List<SeckillGoods> seckillsWithLastDay = seckillRepository.getSeckillsWithLastDay(0);
         System.out.println(seckillsWithLastDay);
     }
+
+
+    @Test
+    void getOverDueSeckill() {
+        List<Long> overDueSeckill = this.seckillRepository.getOverDueSeckillSkuIds();
+        System.out.println(overDueSeckill);
+    }
 }
