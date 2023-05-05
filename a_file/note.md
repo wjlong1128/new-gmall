@@ -20,3 +20,6 @@
 
 # 流水号 防止重复提交
 ![](https://raw.githubusercontent.com/wjlong1128/images/main/xczx/202304281415791.png)
+
+// 打包 mvn install -DskipTests
+            
